@@ -1,0 +1,66 @@
+/* XAIExplanation.css */
+.xai-image-container {
+  text-align: center;
+  margin: 20px 0;
+}
+
+.xai-image {
+  max-width: 100%;
+  height: auto;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  border: 2px solid #e0e0e0;
+  max-height: 400px;
+}
+
+.xai-tabs {
+  margin-bottom: 20px;
+}
+
+.xai-tab {
+  font-weight: bold;
+}
+
+.xai-tab.Mui-selected {
+  color: #1976d2;
+}
+
+.interpretation-guide {
+  margin-top: 15px;
+  padding: 15px;
+  background-color: #e3f2fd;
+  border-radius: 8px;
+  border-left: 4px solid #1976d2;
+}
+
+.confidence-breakdown {
+  margin: 20px 0;
+}
+
+.confidence-item {
+  display: flex;
+  align-items: center;
+  margin: 10px 0;
+}
+
+.confidence-bar {
+  flex-grow: 1;
+  margin: 0 15px;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .xai-image {
+    max-height: 300px;
+  }
+  
+  .confidence-item {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  
+  .confidence-bar {
+    width: 100%;
+    margin: 5px 0;
+  }
+}
