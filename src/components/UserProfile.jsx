@@ -37,7 +37,10 @@ const UserProfile = ({
   adminView = false 
 }) => {
   const [isEditing, setIsEditing] = useState(false);
-  const [activeTab, setActiveTab] = useState(adminView ? 'admin' : 'profile');
+  // If user is admin, land on Admin tab by default; otherwise fall back
+  const [activeTab, setActiveTab] = useState(
+    user?.role === 'admin' ? 'admin' : (adminView ? 'admin' : 'profile')
+  );
   const [userData, setUserData] = useState({
     name: user?.name || 'John Doe',
     email: user?.email || 'john.doe@example.com',
@@ -53,10 +56,14 @@ const UserProfile = ({
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
+    // Auto-switch if the role changes to admin/doctor while the component is mounted
+    if (user?.role === 'admin') setActiveTab('admin');
+    else if (user?.role === 'doctor' && activeTab === 'admin') setActiveTab('doctor');
+
     if (user?.role === 'admin' || user?.role === 'doctor') {
       fetchPerformanceMetrics();
     }
-  }, [user]);
+  }, [user]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const fetchPerformanceMetrics = async () => {
     try {
@@ -82,9 +89,14 @@ const UserProfile = ({
     setLoading(true);
     try {
       await retrainModel();
+      // Immediately poll current status once
+      try {
+        const status = await getRetrainingStatus();
+        onRetrainingStatusChange?.(status);
+      } catch {}
       alert('Model retraining started! Check the status in the Admin panel.');
     } catch (error) {
-      alert('Failed to start retraining: ' + error.message);
+      alert('Failed to start retraining: ' + (error?.message || 'Unknown error'));
     } finally {
       setLoading(false);
     }
@@ -95,9 +107,13 @@ const UserProfile = ({
       setLoading(true);
       try {
         await forceRetrain();
+        try {
+          const status = await getRetrainingStatus();
+          onRetrainingStatusChange?.(status);
+        } catch {}
         alert('Force retraining started!');
       } catch (error) {
-        alert('Failed to start force retraining: ' + error.message);
+        alert('Failed to start force retraining: ' + (error?.message || 'Unknown error'));
       } finally {
         setLoading(false);
       }

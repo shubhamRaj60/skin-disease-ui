@@ -2,15 +2,16 @@ import React, { useState, useEffect } from "react";
 import { 
   FaCamera, FaBrain, FaDiagnoses, FaPrescriptionBottle, 
   FaShieldAlt, FaRocket, FaChartLine, FaSync, FaUsers,
-  FaMobile, FaCloud, FaDatabase, FaLock, FaBell
+  FaMobile, FaCloud, FaDatabase, FaLock, FaBell,
+  FaArrowRight, FaCheckCircle, FaPlay, FaPause
 } from "react-icons/fa";
-import Lottie from "lottie-react";
 import { motion, AnimatePresence } from "framer-motion";
 
 const HowItWorks = () => {
   const [animationData, setAnimationData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [activeStep, setActiveStep] = useState(0);
+  const [autoPlay, setAutoPlay] = useState(true);
   const [stats, setStats] = useState({
     analyses: 0,
     accuracy: 0,
@@ -85,7 +86,7 @@ const HowItWorks = () => {
         }
         setStats(prev => ({
           ...prev,
-          [key]: Math.floor(current)
+          [key]: key === 'accuracy' ? Number(current.toFixed(1)) : Math.floor(current)
         }));
       }, 16);
     });
@@ -93,14 +94,14 @@ const HowItWorks = () => {
 
   // Auto-rotate through steps
   useEffect(() => {
-    if (!isVisible) return;
+    if (!isVisible || !autoPlay) return;
 
     const interval = setInterval(() => {
       setActiveStep(prev => (prev + 1) % steps.length);
     }, 4000);
 
     return () => clearInterval(interval);
-  }, [isVisible]);
+  }, [isVisible, autoPlay]);
 
   const steps = [
     {
@@ -108,32 +109,36 @@ const HowItWorks = () => {
       title: "Image Capture",
       description: "Take or upload a clear, well-lit photo of your skin concern. Ensure the area is in focus and properly visible.",
       details: ["Use good lighting", "Keep camera steady", "Include surrounding area for context"],
-      color: "from-blue-500 to-cyan-500",
-      bgColor: "bg-blue-50"
+      color: "from-cyan-400 to-blue-500",
+      bgColor: "bg-gradient-to-br from-blue-900/30 to-cyan-900/20",
+      iconColor: "text-cyan-400"
     },
     {
       icon: <FaBrain />,
       title: "AI Analysis",
       description: "Our advanced neural network processes the image using deep learning algorithms trained on thousands of dermatological cases.",
       details: ["Pattern recognition", "Feature extraction", "Comparative analysis"],
-      color: "from-purple-500 to-pink-500",
-      bgColor: "bg-purple-50"
+      color: "from-purple-400 to-indigo-500",
+      bgColor: "bg-gradient-to-br from-purple-900/30 to-indigo-900/20",
+      iconColor: "text-purple-400"
     },
     {
       icon: <FaDiagnoses />,
       title: "Instant Diagnosis",
       description: "Receive immediate, AI-powered insights with confidence scores and detailed analysis of potential conditions.",
       details: ["Multiple condition screening", "Confidence scoring", "Risk assessment"],
-      color: "from-green-500 to-emerald-500",
-      bgColor: "bg-green-50"
+      color: "from-emerald-400 to-green-500",
+      bgColor: "bg-gradient-to-br from-emerald-900/30 to-green-900/20",
+      iconColor: "text-emerald-400"
     },
     {
       icon: <FaPrescriptionBottle />,
       title: "Care Plan",
       description: "Get personalized recommendations including self-care tips, when to see a doctor, and potential treatment options.",
       details: ["Personalized advice", "Doctor consultation guidance", "Monitoring recommendations"],
-      color: "from-orange-500 to-red-500",
-      bgColor: "bg-orange-50"
+      color: "from-orange-400 to-red-500",
+      bgColor: "bg-gradient-to-br from-orange-900/30 to-red-900/20",
+      iconColor: "text-orange-400"
     },
   ];
 
@@ -142,25 +147,29 @@ const HowItWorks = () => {
       icon: <FaShieldAlt />,
       title: "Privacy First",
       description: "Your images and data are encrypted and never stored without your permission.",
-      stat: "100% Secure"
+      stat: "100% Secure",
+      color: "from-blue-400 to-cyan-500"
     },
     {
       icon: <FaRocket />,
       title: "Lightning Fast",
       description: "Get results in seconds with our optimized AI model processing.",
-      stat: "< 30s Analysis"
+      stat: "< 30s Analysis",
+      color: "from-purple-400 to-pink-500"
     },
     {
       icon: <FaChartLine />,
       title: "High Accuracy",
       description: "Clinical-grade accuracy verified through extensive testing and validation.",
-      stat: `${stats.accuracy}% Accurate`
+      stat: `${stats.accuracy}% Accurate`,
+      color: "from-green-400 to-emerald-500"
     },
     {
       icon: <FaUsers />,
       title: "Trusted by Many",
       description: "Join thousands of users who trust our platform for skin health insights.",
-      stat: `${stats.users}+ Users`
+      stat: `${stats.users}+ Users`,
+      color: "from-orange-400 to-red-500"
     }
   ];
 
@@ -168,59 +177,49 @@ const HowItWorks = () => {
     {
       icon: <FaMobile />,
       title: "Mobile-Optimized",
-      description: "Responsive design works seamlessly on all devices"
+      description: "Responsive design works seamlessly on all devices",
+      color: "text-blue-400 bg-blue-900/50"
     },
     {
       icon: <FaCloud />,
       title: "Cloud Processing",
-      description: "Scalable infrastructure for reliable performance"
+      description: "Scalable infrastructure for reliable performance",
+      color: "text-cyan-400 bg-cyan-900/50"
     },
     {
       icon: <FaDatabase />,
       title: "Large Dataset",
-      description: "Trained on 10,000+ dermatoscopic images"
+      description: "Trained on 10,000+ dermatoscopic images",
+      color: "text-purple-400 bg-purple-900/50"
     },
     {
       icon: <FaLock />,
       title: "End-to-End Encryption",
-      description: "Military-grade security for your data"
+      description: "Military-grade security for your data",
+      color: "text-green-400 bg-green-900/50"
     },
     {
       icon: <FaSync />,
       title: "Continuous Learning",
-      description: "Model improves with each analysis"
+      description: "Model improves with each analysis",
+      color: "text-orange-400 bg-orange-900/50"
     },
     {
       icon: <FaBell />,
       title: "Real-time Updates",
-      description: "Instant notifications and results"
+      description: "Instant notifications and results",
+      color: "text-red-400 bg-red-900/50"
     }
   ];
 
   const conditions = [
-    { name: "Melanoma", confidence: "98%", color: "bg-red-100 text-red-800" },
-    { name: "Basal Cell Carcinoma", confidence: "96%", color: "bg-orange-100 text-orange-800" },
-    { name: "Actinic Keratosis", confidence: "94%", color: "bg-yellow-100 text-yellow-800" },
-    { name: "Benign Nevi", confidence: "97%", color: "bg-green-100 text-green-800" },
-    { name: "Eczema", confidence: "95%", color: "bg-blue-100 text-blue-800" },
-    { name: "Psoriasis", confidence: "93%", color: "bg-purple-100 text-purple-800" }
+    { name: "Melanoma", confidence: "98%", color: "from-red-400 to-pink-500", width: "98%" },
+    { name: "Basal Cell Carcinoma", confidence: "96%", color: "from-orange-400 to-red-500", width: "96%" },
+    { name: "Actinic Keratosis", confidence: "94%", color: "from-amber-400 to-orange-500", width: "94%" },
+    { name: "Benign Nevi", confidence: "97%", color: "from-green-400 to-emerald-500", width: "97%" },
+    { name: "Eczema", confidence: "95%", color: "from-blue-400 to-cyan-500", width: "95%" },
+    { name: "Psoriasis", confidence: "93%", color: "from-purple-400 to-indigo-500", width: "93%" }
   ];
-
-  const cardVariants = {
-    offscreen: {
-      y: 50,
-      opacity: 0,
-    },
-    onscreen: {
-      y: 0,
-      opacity: 1,
-      transition: {
-        type: "spring",
-        bounce: 0.4,
-        duration: 0.8,
-      },
-    },
-  };
 
   const staggerVariants = {
     hidden: { opacity: 0 },
@@ -242,12 +241,12 @@ const HowItWorks = () => {
 
   if (loading && !isVisible) {
     return (
-      <section id="how-it-works" className="py-20 bg-gradient-to-br from-blue-50 to-indigo-100">
+      <section id="how-it-works" className="py-20 bg-gradient-to-br from-gray-900 via-blue-900 to-slate-900">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-center min-h-[400px]">
             <div className="text-center">
-              <div className="w-16 h-16 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-              <p className="text-gray-600">Loading How It Works...</p>
+              <div className="w-16 h-16 border-4 border-cyan-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+              <p className="text-gray-400">Loading How It Works...</p>
             </div>
           </div>
         </div>
@@ -256,11 +255,18 @@ const HowItWorks = () => {
   }
 
   return (
-    <section id="how-it-works" className="py-20 bg-gradient-to-br from-blue-50 to-indigo-100">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <section id="how-it-works" className="py-24 bg-gradient-to-br from-gray-900 via-blue-900 to-slate-900 relative overflow-hidden">
+      {/* Background Elements */}
+      <div className="absolute inset-0 overflow-hidden">
+        <div className="absolute -top-40 -right-40 w-80 h-80 bg-cyan-900/20 rounded-full opacity-30 blur-3xl"></div>
+        <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-blue-900/20 rounded-full opacity-30 blur-3xl"></div>
+        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-purple-900/10 rounded-full opacity-20 blur-3xl"></div>
+      </div>
+
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         {/* Header Section */}
         <motion.div
-          className="text-center mb-16"
+          className="text-center mb-20"
           initial={{ opacity: 0, y: -20 }}
           animate={isVisible ? { opacity: 1, y: 0 } : {}}
           transition={{ duration: 0.8 }}
@@ -269,70 +275,78 @@ const HowItWorks = () => {
             initial={{ scale: 0 }}
             animate={isVisible ? { scale: 1 } : {}}
             transition={{ type: "spring", stiffness: 200, delay: 0.2 }}
-            className="inline-flex items-center px-4 py-2 rounded-full bg-blue-100 text-blue-600 font-medium mb-4"
+            className="inline-flex items-center px-6 py-3 rounded-full bg-blue-800/50 backdrop-blur-sm text-cyan-300 font-semibold mb-6 shadow-lg border border-cyan-500/30"
           >
-            <FaRocket className="mr-2" /> How It Works
+            <FaRocket className="mr-3 text-cyan-400" /> 
+            <span className="text-sm uppercase tracking-wide">How It Works</span>
           </motion.div>
-          <h2 className="text-4xl md:text-5xl font-extrabold text-gray-900 mb-4">
+          <h2 className="text-5xl md:text-6xl font-bold bg-gradient-to-r from-white via-cyan-100 to-blue-200 bg-clip-text text-transparent mb-6">
             Simple, Fast, and Accurate
           </h2>
-          <p className="text-lg md:text-xl text-gray-600 max-w-3xl mx-auto">
-            Our cutting-edge AI technology makes skin analysis accessible to everyone. 
-            Get professional-level insights in just a few simple steps.
+          <p className="text-xl text-gray-300 max-w-3xl mx-auto leading-relaxed">
+            Our cutting-edge AI technology makes professional skin analysis accessible to everyone. 
+            Get clinical-level insights in just a few simple steps.
           </p>
         </motion.div>
 
         {/* Live Stats */}
         <motion.div
-          className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-16"
+          className="grid grid-cols-2 lg:grid-cols-4 gap-8 mb-20"
           variants={staggerVariants}
           initial="hidden"
           animate={isVisible ? "visible" : "hidden"}
         >
           {[
-            { label: "Analyses Done", value: stats.analyses, icon: "🔍" },
-            { label: "Accuracy Rate", value: `${stats.accuracy}%`, icon: "🎯" },
-            { label: "Active Users", value: stats.users, icon: "👥" },
-            { label: "Conditions", value: stats.conditions, icon: "🩺" }
+            { label: "Analyses Done", value: stats.analyses.toLocaleString(), icon: "🔍", color: "from-blue-400 to-cyan-500" },
+            { label: "Accuracy Rate", value: `${stats.accuracy}%`, icon: "🎯", color: "from-green-400 to-emerald-500" },
+            { label: "Active Users", value: stats.users.toLocaleString(), icon: "👥", color: "from-purple-400 to-indigo-500" },
+            { label: "Conditions", value: stats.conditions, icon: "🩺", color: "from-orange-400 to-red-500" }
           ].map((stat, index) => (
             <motion.div
               key={index}
               variants={itemVariants}
-              className="bg-white rounded-2xl p-6 shadow-lg border border-gray-100 text-center"
-              whileHover={{ scale: 1.05 }}
+              className="bg-gray-800/50 backdrop-blur-lg rounded-2xl p-8 shadow-xl border border-gray-700/50 text-center group hover:shadow-2xl transition-all duration-500"
+              whileHover={{ scale: 1.05, y: -5 }}
             >
-              <div className="text-3xl mb-2">{stat.icon}</div>
-              <div className="text-2xl md:text-3xl font-bold text-gray-900 mb-1">
+              <div className="text-4xl mb-4 transform group-hover:scale-110 transition-transform duration-300">{stat.icon}</div>
+              <div className={`text-3xl md:text-4xl font-bold bg-gradient-to-r ${stat.color} bg-clip-text text-transparent mb-2`}>
                 {stat.value}
               </div>
-              <div className="text-gray-600 text-sm">{stat.label}</div>
+              <div className="text-gray-400 font-medium text-sm uppercase tracking-wide">{stat.label}</div>
             </motion.div>
           ))}
         </motion.div>
 
         {/* Interactive Steps */}
-        <div className="mb-16">
-          <div className="text-center mb-8">
-            <h3 className="text-2xl font-bold text-gray-900 mb-2">4 Simple Steps to Better Skin Health</h3>
-            <p className="text-gray-600">Click on each step or watch them auto-play</p>
+        <div className="mb-20">
+          <div className="text-center mb-12">
+            <h3 className="text-3xl font-bold text-white mb-4">4 Simple Steps to Better Skin Health</h3>
+            <p className="text-gray-400 text-lg">Click on each step or watch them auto-play</p>
           </div>
 
           {/* Step Navigation */}
-          <div className="flex justify-center mb-8">
-            <div className="bg-white rounded-2xl p-2 shadow-lg flex space-x-2">
+          <div className="flex justify-center mb-12">
+            <div className="bg-gray-800/50 backdrop-blur-sm rounded-2xl p-2 shadow-lg flex space-x-3 border border-gray-700/50">
               {steps.map((step, index) => (
                 <button
                   key={index}
                   onClick={() => setActiveStep(index)}
-                  className={`px-4 py-2 rounded-xl font-medium transition-all ${
+                  className={`px-6 py-3 rounded-xl font-semibold transition-all duration-300 flex items-center space-x-2 ${
                     activeStep === index
                       ? `bg-gradient-to-r ${step.color} text-white shadow-lg`
-                      : "text-gray-600 hover:text-gray-900"
+                      : "text-gray-400 hover:text-white bg-gray-700/50 hover:bg-gray-700/80"
                   }`}
                 >
-                  Step {index + 1}
+                  <span>Step {index + 1}</span>
+                  {activeStep === index && <FaArrowRight className="text-sm" />}
                 </button>
               ))}
+              <button
+                onClick={() => setAutoPlay(!autoPlay)}
+                className="px-4 py-3 rounded-xl font-semibold text-gray-400 hover:text-white bg-gray-700/50 hover:bg-gray-700/80 transition-all duration-300"
+              >
+                {autoPlay ? <FaPause /> : <FaPlay />}
+              </button>
             </div>
           </div>
 
@@ -345,44 +359,52 @@ const HowItWorks = () => {
                 animate={{ opacity: 1, x: 0 }}
                 exit={{ opacity: 0, x: -50 }}
                 transition={{ duration: 0.5 }}
-                className="bg-white rounded-3xl shadow-2xl border border-gray-100 overflow-hidden"
+                className="bg-gray-800/50 backdrop-blur-lg rounded-3xl shadow-2xl border border-gray-700/50 overflow-hidden"
               >
-                <div className="flex flex-col md:flex-row">
-                  <div className="md:w-1/2 p-8">
-                    <div className="flex items-center mb-6">
-                      <div className={`w-16 h-16 rounded-2xl bg-gradient-to-r ${steps[activeStep].color} flex items-center justify-center text-white font-bold text-xl mr-4`}>
+                <div className="flex flex-col lg:flex-row">
+                  <div className="lg:w-1/2 p-10">
+                    <div className="flex items-start mb-8">
+                      <div className={`w-20 h-20 rounded-2xl bg-gradient-to-r ${steps[activeStep].color} flex items-center justify-center text-white font-bold text-2xl mr-6 shadow-lg`}>
                         {activeStep + 1}
                       </div>
-                      <div>
-                        <h3 className="text-2xl font-bold text-gray-900">{steps[activeStep].title}</h3>
-                        <p className="text-gray-600">{steps[activeStep].description}</p>
+                      <div className="flex-1">
+                        <h3 className="text-3xl font-bold text-white mb-4">{steps[activeStep].title}</h3>
+                        <p className="text-gray-300 text-lg leading-relaxed">{steps[activeStep].description}</p>
                       </div>
                     </div>
                     
-                    <ul className="space-y-3">
+                    <ul className="space-y-4">
                       {steps[activeStep].details.map((detail, index) => (
                         <motion.li
                           key={index}
                           initial={{ opacity: 0, x: -20 }}
                           animate={{ opacity: 1, x: 0 }}
-                          transition={{ delay: index * 0.1 }}
-                          className="flex items-center text-gray-700"
+                          transition={{ delay: index * 0.1 + 0.3 }}
+                          className="flex items-center text-gray-300 text-lg p-3 rounded-xl hover:bg-gray-700/30 transition-colors duration-300"
                         >
-                          <span className="w-2 h-2 bg-blue-400 rounded-full mr-3 flex-shrink-0"></span>
-                          {detail}
+                          <FaCheckCircle className={`text-xl mr-4 ${steps[activeStep].iconColor} flex-shrink-0`} />
+                          <span>{detail}</span>
                         </motion.li>
                       ))}
                     </ul>
                   </div>
                   
-                  <div className="md:w-1/2 bg-gradient-to-br from-gray-50 to-gray-100 flex items-center justify-center p-8 min-h-[300px]">
-                    <div className="text-center">
-                      <div className="w-20 h-20 mx-auto mb-4 bg-white rounded-2xl shadow-lg flex items-center justify-center">
-                        {React.cloneElement(steps[activeStep].icon, { 
-                          className: `text-3xl bg-gradient-to-r ${steps[activeStep].color} bg-clip-text text-transparent` 
-                        })}
+                  <div className={`lg:w-1/2 ${steps[activeStep].bgColor} flex items-center justify-center p-10 min-h-[400px] relative overflow-hidden border-l border-gray-700/30`}>
+                    <div className="text-center relative z-10">
+                      <div className="w-24 h-24 mx-auto mb-6 bg-gray-800/50 rounded-2xl shadow-2xl flex items-center justify-center transform hover:scale-110 transition-transform duration-300 border border-gray-700/50">
+                        <div className={`text-4xl bg-gradient-to-r ${steps[activeStep].color} bg-clip-text text-transparent`}>
+                          {steps[activeStep].icon}
+                        </div>
                       </div>
-                      <p className="text-gray-600">Step {activeStep + 1} of {steps.length}</p>
+                      <div className="bg-gray-800/50 backdrop-blur-sm rounded-2xl px-4 py-2 inline-block border border-gray-700/50">
+                        <p className="text-gray-300 font-semibold">Step {activeStep + 1} of {steps.length}</p>
+                      </div>
+                    </div>
+                    {/* Background pattern */}
+                    <div className="absolute inset-0 opacity-10">
+                      <div className="absolute top-10 right-10 text-6xl text-white">•</div>
+                      <div className="absolute bottom-10 left-10 text-6xl text-white">•</div>
+                      <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-8xl text-white">•</div>
                     </div>
                   </div>
                 </div>
@@ -393,7 +415,7 @@ const HowItWorks = () => {
 
         {/* Enhanced Features Grid */}
         <motion.div
-          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-16"
+          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-20"
           variants={staggerVariants}
           initial="hidden"
           animate={isVisible ? "visible" : "hidden"}
@@ -402,73 +424,87 @@ const HowItWorks = () => {
             <motion.div
               key={index}
               variants={itemVariants}
-              className="bg-white rounded-2xl p-6 shadow-lg border border-gray-100 group cursor-pointer"
+              className="bg-gray-800/50 backdrop-blur-lg rounded-2xl p-8 shadow-xl border border-gray-700/50 group cursor-pointer relative overflow-hidden"
               whileHover={{ 
                 scale: 1.05,
-                y: -5,
-                boxShadow: "0 20px 40px rgba(0,0,0,0.1)"
+                y: -8,
               }}
+              transition={{ type: "spring", stiffness: 300 }}
             >
-              <div className="w-12 h-12 mb-4 bg-blue-100 rounded-xl flex items-center justify-center group-hover:bg-blue-200 transition-colors">
-                {React.cloneElement(feature.icon, { className: "text-xl text-blue-600" })}
+              {/* Background gradient on hover */}
+              <div className={`absolute inset-0 bg-gradient-to-br ${feature.color} opacity-0 group-hover:opacity-10 transition-opacity duration-500`}></div>
+              
+              <div className={`w-16 h-16 mb-6 rounded-2xl bg-gradient-to-r ${feature.color} flex items-center justify-center text-white transform group-hover:scale-110 transition-transform duration-300 shadow-lg`}>
+                {React.cloneElement(feature.icon, { className: "text-2xl" })}
               </div>
-              <h3 className="text-lg font-semibold text-gray-900 mb-2">{feature.title}</h3>
-              <p className="text-gray-600 text-sm mb-3">{feature.description}</p>
-              <div className="text-blue-600 font-bold text-sm">{feature.stat}</div>
+              <h3 className="text-xl font-bold text-white mb-4">{feature.title}</h3>
+              <p className="text-gray-300 mb-6 leading-relaxed">{feature.description}</p>
+              <div className={`text-transparent bg-gradient-to-r ${feature.color} bg-clip-text font-bold text-lg`}>
+                {feature.stat}
+              </div>
             </motion.div>
           ))}
         </motion.div>
 
         {/* Technology Stack */}
         <motion.div
-          className="bg-white rounded-3xl shadow-2xl overflow-hidden mb-16"
+          className="bg-gray-800/50 backdrop-blur-lg rounded-3xl shadow-2xl overflow-hidden mb-20 border border-gray-700/50"
           initial={{ opacity: 0, y: 50 }}
           animate={isVisible ? { opacity: 1, y: 0 } : {}}
           transition={{ duration: 0.8 }}
         >
-          <div className="flex flex-col lg:flex-row">
-            <div className="lg:w-1/2 p-8 md:p-12">
+          <div className="flex flex-col xl:flex-row">
+            <div className="xl:w-1/2 p-10 xl:p-12">
               <motion.div
                 initial={{ opacity: 0, x: -20 }}
                 animate={isVisible ? { opacity: 1, x: 0 } : {}}
                 transition={{ delay: 0.2 }}
               >
-                <div className="inline-flex items-center px-4 py-2 rounded-full bg-green-100 text-green-600 font-medium mb-4">
-                  <FaBrain className="mr-2" /> Technology Stack
+                <div className="inline-flex items-center px-6 py-3 rounded-full bg-emerald-900/50 text-emerald-300 font-semibold mb-6 border border-emerald-500/30">
+                  <FaBrain className="mr-3" /> 
+                  <span className="text-sm uppercase tracking-wide">Technology Stack</span>
                 </div>
-                <h3 className="text-3xl font-bold text-gray-900 mb-6">
+                <h3 className="text-4xl font-bold text-white mb-8">
                   Powered by Cutting-Edge AI
                 </h3>
                 
-                <div className="grid grid-cols-2 gap-4 mb-8">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 mb-12">
                   {techSpecs.map((spec, index) => (
-                    <div key={index} className="flex items-start space-x-3 p-3 rounded-lg hover:bg-gray-50 transition-colors">
-                      <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center flex-shrink-0">
-                        {React.cloneElement(spec.icon, { className: "text-blue-600" })}
+                    <motion.div 
+                      key={index}
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={isVisible ? { opacity: 1, y: 0 } : {}}
+                      transition={{ delay: 0.3 + index * 0.1 }}
+                      className="flex items-start space-x-4 p-4 rounded-2xl hover:bg-gray-700/30 transition-all duration-300 group border border-gray-700/30"
+                    >
+                      <div className={`w-12 h-12 rounded-xl ${spec.color.split(' ')[1]} flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform duration-300 border border-gray-600/30`}>
+                        {React.cloneElement(spec.icon, { className: `${spec.color.split(' ')[0]} text-lg` })}
                       </div>
                       <div>
-                        <h4 className="font-semibold text-gray-900 text-sm mb-1">{spec.title}</h4>
-                        <p className="text-gray-600 text-xs">{spec.description}</p>
+                        <h4 className="font-bold text-white text-lg mb-2">{spec.title}</h4>
+                        <p className="text-gray-300">{spec.description}</p>
                       </div>
-                    </div>
+                    </motion.div>
                   ))}
                 </div>
 
                 {/* Accuracy by Condition */}
-                <div className="bg-gray-50 rounded-2xl p-6 border border-gray-200">
-                  <h4 className="font-semibold text-gray-900 mb-4">Detection Accuracy by Condition</h4>
-                  <div className="space-y-3">
+                <div className="bg-gray-700/30 backdrop-blur-sm rounded-2xl p-8 border border-gray-600/30">
+                  <h4 className="font-bold text-white text-2xl mb-6">Detection Accuracy by Condition</h4>
+                  <div className="space-y-5">
                     {conditions.map((condition, index) => (
-                      <div key={index} className="flex items-center justify-between">
-                        <span className="text-sm text-gray-700">{condition.name}</span>
-                        <div className="flex items-center space-x-2">
-                          <div className="w-20 bg-gray-200 rounded-full h-2">
-                            <div 
-                              className={`h-2 rounded-full ${condition.color.split(' ')[0]}`}
-                              style={{ width: condition.confidence }}
-                            ></div>
+                      <div key={index} className="flex items-center justify-between group">
+                        <span className="text-gray-300 font-medium text-lg flex-1">{condition.name}</span>
+                        <div className="flex items-center space-x-4 w-48">
+                          <div className="w-full bg-gray-600 rounded-full h-3 overflow-hidden">
+                            <motion.div 
+                              className={`h-3 rounded-full bg-gradient-to-r ${condition.color} shadow-lg`}
+                              initial={{ width: 0 }}
+                              animate={{ width: condition.width }}
+                              transition={{ delay: 1 + index * 0.1, duration: 1 }}
+                            />
                           </div>
-                          <span className="text-sm font-medium text-gray-700 w-12">{condition.confidence}</span>
+                          <span className="text-white font-bold text-lg w-12 text-right">{condition.confidence}</span>
                         </div>
                       </div>
                     ))}
@@ -478,34 +514,60 @@ const HowItWorks = () => {
             </div>
 
             {/* Live Demo Side */}
-            <div className="lg:w-1/2 bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center p-8 min-h-[500px]">
+            <div className="xl:w-1/2 bg-gradient-to-br from-blue-600 via-purple-600 to-cyan-600 flex items-center justify-center p-10 xl:p-12 min-h-[600px] relative overflow-hidden">
+              <div className="absolute inset-0 bg-black/20"></div>
               <motion.div
                 initial={{ opacity: 0, scale: 0.8 }}
                 animate={isVisible ? { opacity: 1, scale: 1 } : {}}
                 transition={{ duration: 0.8, delay: 0.4 }}
-                className="text-center text-white"
+                className="text-center text-white relative z-10"
               >
-                <div className="w-32 h-32 mx-auto mb-6 bg-white/20 rounded-2xl flex items-center justify-center backdrop-blur-sm">
-                  <FaBrain className="text-6xl text-white/90" />
+                <div className="w-40 h-40 mx-auto mb-8 bg-white/20 rounded-3xl flex items-center justify-center backdrop-blur-lg border border-white/30 shadow-2xl">
+                  <FaBrain className="text-7xl text-white/90" />
                 </div>
-                <h4 className="text-2xl font-bold mb-2">Live AI Processing</h4>
-                <p className="text-white/80 mb-6 max-w-sm">
-                  Real-time analysis powered by our advanced neural network
+                <h4 className="text-3xl font-bold mb-4">Live AI Processing</h4>
+                <p className="text-white/90 text-lg mb-8 max-w-md mx-auto leading-relaxed">
+                  Real-time analysis powered by our advanced neural network trained on clinical data
                 </p>
                 
-                {/* Simulated Processing Animation */}
-                <div className="bg-white/10 rounded-xl p-4 backdrop-blur-sm">
-                  <div className="flex space-x-2 mb-3">
+                {/* Enhanced Processing Animation */}
+                <div className="bg-white/10 backdrop-blur-lg rounded-2xl p-6 border border-white/20 shadow-xl">
+                  <div className="flex justify-center space-x-3 mb-4">
                     {[1, 2, 3].map((dot) => (
                       <motion.div
                         key={dot}
-                        className="w-2 h-2 bg-white rounded-full"
-                        animate={{ opacity: [0.3, 1, 0.3] }}
-                        transition={{ duration: 1.5, repeat: Infinity, delay: dot * 0.2 }}
+                        className="w-3 h-3 bg-white rounded-full"
+                        animate={{ 
+                          scale: [1, 1.5, 1],
+                          opacity: [0.3, 1, 0.3]
+                        }}
+                        transition={{ 
+                          duration: 1.5, 
+                          repeat: Infinity, 
+                          delay: dot * 0.2 
+                        }}
                       />
                     ))}
                   </div>
-                  <p className="text-sm text-white/70">Analyzing skin patterns...</p>
+                  <p className="text-white/80 font-medium">Analyzing skin patterns in real-time...</p>
+                  
+                  {/* Progress bars */}
+                  <div className="mt-4 space-y-3">
+                    {['Pattern Recognition', 'Feature Analysis', 'Condition Matching'].map((stage, idx) => (
+                      <div key={idx} className="flex items-center space-x-3">
+                        <div className="w-3 h-3 bg-green-400 rounded-full animate-pulse"></div>
+                        <span className="text-white/70 text-sm flex-1">{stage}</span>
+                        <motion.div 
+                          className="h-2 bg-white/20 rounded-full overflow-hidden flex-1 max-w-32"
+                          initial={{ width: 0 }}
+                          animate={{ width: "100%" }}
+                          transition={{ delay: 1 + idx * 0.5, duration: 2 }}
+                        >
+                          <div className="h-full bg-green-400 rounded-full"></div>
+                        </motion.div>
+                      </div>
+                    ))}
+                  </div>
                 </div>
               </motion.div>
             </div>
@@ -519,27 +581,34 @@ const HowItWorks = () => {
           animate={isVisible ? { opacity: 1, y: 0 } : {}}
           transition={{ duration: 0.6 }}
         >
-          <div className="bg-gradient-to-r from-blue-600 to-purple-600 rounded-3xl p-8 text-white shadow-2xl">
-            <h3 className="text-2xl md:text-3xl font-bold mb-4">
+          <div className="bg-gradient-to-r from-cyan-600 to-blue-700 rounded-3xl p-12 text-white shadow-2xl relative overflow-hidden border border-cyan-500/30">
+            {/* Background pattern */}
+            <div className="absolute inset-0 opacity-10">
+              <div className="absolute top-0 left-0 w-32 h-32 bg-white rounded-full -translate-x-1/2 -translate-y-1/2"></div>
+              <div className="absolute bottom-0 right-0 w-32 h-32 bg-white rounded-full translate-x-1/2 translate-y-1/2"></div>
+            </div>
+            
+            <h3 className="text-3xl md:text-4xl font-bold mb-6 relative z-10">
               Ready to Experience AI-Powered Skin Analysis?
             </h3>
-            <p className="text-blue-100 mb-6 max-w-2xl mx-auto">
-              Join {stats.users}+ users who trust our platform for accurate, instant skin health insights.
+            <p className="text-cyan-100 text-xl mb-8 max-w-2xl mx-auto relative z-10">
+              Join {stats.users.toLocaleString()}+ users who trust our platform for accurate, instant skin health insights.
             </p>
-            <div className="flex flex-col sm:flex-row justify-center gap-4">
+            <div className="flex flex-col sm:flex-row justify-center gap-6 relative z-10">
               <motion.button
-                className="bg-white text-blue-600 px-8 py-4 rounded-full font-semibold shadow-lg hover:shadow-xl transition-all"
+                className="bg-white text-cyan-700 px-10 py-4 rounded-2xl font-bold shadow-2xl hover:shadow-3xl transition-all duration-300 flex items-center justify-center space-x-3 hover:bg-cyan-50"
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
               >
-                Start Free Analysis
+                <span>Start Free Analysis</span>
+                <FaArrowRight className="text-sm" />
               </motion.button>
               <motion.button
-                className="border-2 border-white text-white px-8 py-4 rounded-full font-semibold hover:bg-white hover:text-blue-600 transition-all"
+                className="border-2 border-white text-white px-10 py-4 rounded-2xl font-bold hover:bg-white hover:text-cyan-700 transition-all duration-300"
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
               >
-                View Demo
+                View Live Demo
               </motion.button>
             </div>
           </div>

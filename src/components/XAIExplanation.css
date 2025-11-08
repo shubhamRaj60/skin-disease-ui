@@ -1,66 +1,536 @@
-/* XAIExplanation.css */
-.xai-image-container {
-  text-align: center;
-  margin: 20px 0;
+/* src/components/XAIExplanation.css */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+/* Global Styles */
+* {
+  box-sizing: border-box;
 }
 
+.xai-background {
+  font-family: 'Inter', 'Roboto', 'Helvetica', 'Arial', sans-serif;
+  background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%) !important;
+  color: #f1f5f9;
+}
+
+/* Smooth scrolling */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #1e293b;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(135deg, #1d4ed8, #3b82f6);
+}
+
+/* Animation classes */
+.fade-in {
+  animation: fadeIn 0.6s ease-in-out;
+}
+
+.slide-up {
+  animation: slideUp 0.8s ease-out;
+}
+
+.bounce-in {
+  animation: bounceIn 1s ease-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(40px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes bounceIn {
+  0% {
+    opacity: 0;
+    transform: scale(0.3);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.05);
+  }
+  70% {
+    transform: scale(0.9);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* Enhanced card hover effects */
+.medical-card {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  border: 1px solid transparent;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+}
+
+.medical-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(59, 130, 246, 0.1), transparent);
+  transition: left 0.5s;
+}
+
+.medical-card:hover::before {
+  left: 100%;
+}
+
+.medical-card:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 20px 40px rgba(59, 130, 246, 0.2);
+  border-color: rgba(59, 130, 246, 0.3);
+}
+
+/* Gradient text */
+.gradient-text {
+  background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.medical-gradient {
+  background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+}
+
+/* Pulse animation for important elements */
+.pulse-alert {
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4);
+  }
+  70% {
+    box-shadow: 0 0 0 10px rgba(239, 68, 68, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(239, 68, 68, 0);
+  }
+}
+
+/* Medical icon animations */
+.medical-icon {
+  transition: all 0.3s ease;
+  filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));
+}
+
+.medical-icon:hover {
+  transform: scale(1.1);
+  filter: drop-shadow(0 4px 8px rgba(0,0,0,0.4));
+}
+
+/* Progress bar animations */
+.MuiLinearProgress-bar {
+  transition: transform 0.4s cubic-bezier(0.65, 0, 0.35, 1);
+}
+
+/* Confidence score animations */
+.confidence-score {
+  transition: all 0.3s ease;
+  position: relative;
+}
+
+.confidence-score:hover {
+  transform: scale(1.05);
+  z-index: 10;
+}
+
+/* Tab animations */
+.MuiTab-root {
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.MuiTab-root::before {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  width: 0;
+  height: 3px;
+  background: linear-gradient(90deg, #3b82f6, #1d4ed8);
+  transition: all 0.3s ease;
+  transform: translateX(-50%);
+}
+
+.MuiTab-root:hover::before {
+  width: 80%;
+}
+
+.MuiTab-root.Mui-selected::before {
+  width: 100%;
+}
+
+.MuiTab-root:hover {
+  background-color: rgba(59, 130, 246, 0.1);
+}
+
+/* Accordion animations */
+.MuiAccordion-root {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+}
+
+.MuiAccordion-root::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, #3b82f6, #1d4ed8);
+  transform: scaleX(0);
+  transition: transform 0.3s ease;
+}
+
+.MuiAccordion-root:hover::before {
+  transform: scaleX(1);
+}
+
+.MuiAccordion-root:hover {
+  box-shadow: 0 8px 25px rgba(0,0,0,0.2);
+}
+
+/* Image hover effects */
 .xai-image {
-  max-width: 100%;
-  height: auto;
-  border-radius: 8px;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-  border: 2px solid #e0e0e0;
-  max-height: 400px;
+  transition: all 0.3s ease;
+  cursor: zoom-in;
+  position: relative;
 }
 
-.xai-tabs {
-  margin-bottom: 20px;
+.xai-image::after {
+  content: '🔍 Click to zoom';
+  position: absolute;
+  bottom: 10px;
+  right: 10px;
+  background: rgba(0, 0, 0, 0.8);
+  color: white;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  opacity: 0;
+  transition: opacity 0.3s ease;
 }
 
-.xai-tab {
-  font-weight: bold;
+.xai-image:hover::after {
+  opacity: 1;
 }
 
-.xai-tab.Mui-selected {
-  color: #1976d2;
+.xai-image:hover {
+  transform: scale(1.02);
+  box-shadow: 0 16px 40px rgba(0,0,0,0.4) !important;
 }
 
-.interpretation-guide {
-  margin-top: 15px;
-  padding: 15px;
-  background-color: #e3f2fd;
-  border-radius: 8px;
-  border-left: 4px solid #1976d2;
+/* Chip animations */
+.MuiChip-root {
+  transition: all 0.2s ease;
+  position: relative;
+  overflow: hidden;
 }
 
-.confidence-breakdown {
-  margin: 20px 0;
+.MuiChip-root::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+  transition: left 0.5s;
 }
 
-.confidence-item {
-  display: flex;
-  align-items: center;
+.MuiChip-root:hover::before {
+  left: 100%;
+}
+
+.MuiChip-root:hover {
+  transform: scale(1.05);
+}
+
+/* Alert animations */
+.MuiAlert-root {
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.MuiAlert-root::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 4px;
+  height: 100%;
+  background: currentColor;
+  opacity: 0.3;
+}
+
+.MuiAlert-root:hover {
+  transform: translateX(4px);
+}
+
+/* Confidence visualization enhancements */
+.confidence-visualization {
+  background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+  border-radius: 12px;
+  padding: 20px;
   margin: 10px 0;
+  color: white;
+  position: relative;
+  overflow: hidden;
 }
 
-.confidence-bar {
-  flex-grow: 1;
-  margin: 0 15px;
+.confidence-visualization::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+  animation: rotate 10s linear infinite;
 }
 
-/* Responsive design */
+@keyframes rotate {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Background gradient shift used in component inline styles */
+@keyframes gradientShift {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+/* Responsive improvements */
 @media (max-width: 768px) {
-  .xai-image {
-    max-height: 300px;
+  .medical-card {
+    margin-bottom: 1rem;
   }
   
-  .confidence-item {
-    flex-direction: column;
-    align-items: flex-start;
+  .medical-card:hover {
+    transform: translateY(-4px);
   }
   
-  .confidence-bar {
+  .gradient-text {
+    font-size: 1.5rem;
+  }
+  
+  .xai-image:hover {
+    transform: none;
+  }
+  
+  .xai-image::after {
+    display: none;
+  }
+  
+  /* Stack cards on mobile */
+  .MuiGrid-item {
     width: 100%;
-    margin: 5px 0;
   }
+  
+  /* Adjust padding for mobile */
+  .MuiContainer-root {
+    padding-left: 16px;
+    padding-right: 16px;
+  }
+  
+  /* Smaller text on mobile */
+  .MuiTypography-h4 {
+    font-size: 1.75rem !important;
+  }
+  
+  .MuiTypography-h5 {
+    font-size: 1.5rem !important;
+  }
+  
+  .MuiTypography-h6 {
+    font-size: 1.25rem !important;
+  }
+  
+  /* Adjust confidence scores for mobile */
+  .confidence-score {
+    font-size: 0.875rem !important;
+  }
+}
+
+/* Large screen optimizations */
+@media (min-width: 1200px) {
+  .MuiContainer-maxWidthXl {
+    max-width: 1400px;
+  }
+}
+
+/* Respect users who prefer reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+  .xai-image::after { display: none !important; }
+}
+
+/* Performance optimizations */
+.performance-optimized {
+  transform: translateZ(0);
+  backface-visibility: hidden;
+  perspective: 1000;
+}
+
+/* Print styles */
+@media print {
+  .no-print {
+    display: none !important;
+  }
+  
+  .medical-card {
+    break-inside: avoid;
+    box-shadow: none !important;
+    border: 1px solid #ddd !important;
+    transform: none !important;
+  }
+  
+  .xai-background {
+    background: white !important;
+  }
+  
+  /* Ensure good contrast for printing */
+  .MuiTypography-root {
+    color: black !important;
+  }
+  
+  /* Hide interactive elements */
+  .MuiTabs-root,
+  .medical-card:hover {
+    transform: none !important;
+  }
+  
+  /* Show URLs for links */
+  a[href]:after {
+    content: " (" attr(href) ")";
+  }
+}
+
+/* Focus styles for accessibility */
+.MuiButtonBase-root:focus-visible,
+.MuiTab-root:focus-visible {
+  outline: 2px solid #3b82f6;
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* Custom selection colors */
+::selection {
+  background-color: rgba(59, 130, 246, 0.3);
+  color: white;
+}
+
+::-moz-selection {
+  background-color: rgba(59, 130, 246, 0.3);
+  color: white;
+}
+
+/* Error state styling */
+.confidence-error {
+  background: linear-gradient(135deg, #7f1d1d 0%, #991b1b 100%);
+  border: 1px solid #ef4444;
+  color: #fca5a5;
+  padding: 8px 12px;
+  border-radius: 6px;
+  font-weight: 500;
+}
+
+/* Success state styling */
+.confidence-success {
+  background: linear-gradient(135deg, #064e3b 0%, #065f46 100%);
+  border: 1px solid #10b981;
+  color: #a7f3d0;
+  padding: 8px 12px;
+  border-radius: 6px;
+  font-weight: 500;
+}
+
+/* Warning state styling */
+.confidence-warning {
+  background: linear-gradient(135deg, #78350f 0%, #92400e 100%);
+  border: 1px solid #f59e0b;
+  color: #fcd34d;
+  padding: 8px 12px;
+  border-radius: 6px;
+  font-weight: 500;
+}
+
+/* Dark theme specific enhancements */
+.MuiPaper-root {
+  background-color: #1e293b;
+}
+
+.MuiCardContent-root {
+  background-color: transparent;
+}
+
+/* Enhanced text contrast */
+.MuiTypography-body1 {
+  color: #e2e8f0;
+}
+
+.MuiTypography-body2 {
+  color: #cbd5e1;
+}
+
+/* Improved button contrast */
+.MuiButton-contained {
+  background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+}
+
+.MuiButton-contained:hover {
+  background: linear-gradient(135deg, #1d4ed8, #3b82f6);
 }

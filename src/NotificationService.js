@@ -16,6 +16,7 @@ class NotificationService {
   constructor() {
     this.listeners = [];
     this.notifications = [];
+    this.timers = new Map();
   }
 
   subscribe(callback) {
@@ -35,6 +36,17 @@ class NotificationService {
 
     this.notifications.unshift(newNotification);
     this.listeners.forEach(callback => callback([...this.notifications]));
+
+    if (newNotification.autoClose) {
+      const timerId = setTimeout(() => {
+        this.clear(newNotification.id);
+      }, newNotification.autoClose);
+      this.timers.set(newNotification.id, timerId);
+    }
+  }
+
+  getNotifications() {
+    return [...this.notifications];
   }
 
   markAsRead(id) {
@@ -45,11 +57,17 @@ class NotificationService {
   }
 
   clear(id) {
+    if (this.timers.has(id)) {
+      clearTimeout(this.timers.get(id));
+      this.timers.delete(id);
+    }
     this.notifications = this.notifications.filter(notif => notif.id !== id);
     this.listeners.forEach(callback => callback([...this.notifications]));
   }
 
   clearAll() {
+    this.timers.forEach(timerId => clearTimeout(timerId));
+    this.timers.clear();
     this.notifications = [];
     this.listeners.forEach(callback => callback([]));
   }
@@ -102,7 +120,7 @@ class NotificationService {
       type: 'warning',
       title: 'Security Alert',
       message: 'Unusual activity detected in your account',
-      icon: FaShield,
+      icon: FaShieldAlt,
       priority: 'critical'
     });
   }

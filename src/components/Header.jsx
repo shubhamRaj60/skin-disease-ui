@@ -27,10 +27,17 @@ import {
   FaExclamationCircle,
   FaStar,
   FaCalendarAlt,
-  FaRocket
+  FaRocket,
+  FaClinicMedical,
+  FaChevronDown,
+  FaSearch,
+  FaUserFriends,
+  FaCrown,
+  FaBrain,
+  FaFlask
 } from 'react-icons/fa';
 import { motion, AnimatePresence } from 'framer-motion';
-import { notificationService } from '../NotificationService'; 
+import { notificationService } from '../NotificationService';
 
 const Header = ({ 
   user, 
@@ -45,76 +52,117 @@ const Header = ({
   const [notifications, setNotifications] = useState([]);
   const [unreadCount, setUnreadCount] = useState(0);
   const [isOnline, setIsOnline] = useState(navigator.onLine);
+  const [isScrolled, setIsScrolled] = useState(false);
+  const [userMenuOpen, setUserMenuOpen] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
   const notificationRef = useRef(null);
+  const userMenuRef = useRef(null);
+  const wasOfflineRef = useRef(!navigator.onLine);
+  const lastAnalysisNotificationRef = useRef(null);
 
-  // Base navigation items for all users
-  const baseNavItems = [
-    { name: 'Home', path: '/', icon: FaHome, description: 'Dashboard overview' },
-    { name: 'Analysis', path: '/analysis', icon: FaHeartbeat, description: 'Skin analysis' },
-    { name: 'How It Works', path: '/how-it-works', icon: FaInfoCircle, description: 'Learn about AI' },
-    { name: 'Find Doctors', path: '/dermatologists', icon: FaMapMarkerAlt, description: 'Nearby specialists' },
-    { name: 'Community', path: '/community', icon: FaUsers, description: 'Health insights' },
-    { name: 'Prevention', path: '/prevention', icon: FaShieldAlt, description: 'Skin care tips' },
-  ];
+  // Enhanced scroll effect with better performance
+  useEffect(() => {
+    const handleScroll = () => {
+      const scrollY = window.scrollY;
+      setIsScrolled(scrollY > 20);
+    };
 
-  // Role-based navigation items
+    const throttledScroll = throttle(handleScroll, 100);
+    window.addEventListener('scroll', throttledScroll, { passive: true });
+    
+    return () => window.removeEventListener('scroll', throttledScroll);
+  }, []);
+
+  // Throttle function for performance
+  function throttle(func, limit) {
+    let inThrottle;
+    return function() {
+      const args = arguments;
+      const context = this;
+      if (!inThrottle) {
+        func.apply(context, args);
+        inThrottle = true;
+        setTimeout(() => inThrottle = false, limit);
+      }
+    }
+  }
+
+  // Enhanced navigation structure with categories
+  const navigationStructure = {
+    main: [
+      { name: 'Home', path: '/', icon: FaHome, description: 'Dashboard overview', badge: null },
+      { name: 'AI Analysis', path: '/analysis', icon: FaBrain, description: 'Skin analysis', badge: 'AI' },
+    ],
+    information: [
+      { name: 'How It Works', path: '/how-it-works', icon: FaInfoCircle, description: 'Learn about AI' },
+      { name: 'Community', path: '/community', icon: FaUsers, description: 'Health insights' },
+    ],
+    professional: [
+      { name: 'Find Doctors', path: '/dermatologists', icon: FaMapMarkerAlt, description: 'Nearby specialists' },
+    ]
+  };
+
+  // Enhanced role-based navigation
   const getRoleNavItems = () => {
     if (!user) return [];
 
     const roleItems = [
-      { name: 'History', path: '/history', icon: FaHistory, description: 'Past analyses' }
+      { name: 'History', path: '/history', icon: FaHistory, description: 'Past analyses', category: 'personal' }
     ];
 
     if (user.role === 'doctor') {
       roleItems.push(
-        { name: 'Doctor Portal', path: '/doctor', icon: FaStethoscope, description: 'Medical dashboard' }
+        { name: 'Doctor Portal', path: '/doctor', icon: FaStethoscope, description: 'Medical dashboard', category: 'professional', badge: 'PRO' }
       );
     }
 
     if (user.role === 'admin') {
       roleItems.push(
-        { name: 'Admin Panel', path: '/admin', icon: FaCog, description: 'System management' },
-        { name: 'Analytics', path: '/profile', icon: FaChartLine, description: 'Performance metrics' }
+        { name: 'Admin Panel', path: '/admin', icon: FaCog, description: 'System management', category: 'admin', badge: 'ADMIN' },
+        { name: 'Analytics', path: '/analytics', icon: FaChartLine, description: 'Performance metrics', category: 'admin' }
       );
     }
 
     if (user.role === 'user') {
       roleItems.push(
-        { name: 'Profile', path: '/profile', icon: FaUserCircle, description: 'Account settings' }
+        { name: 'My Profile', path: '/profile', icon: FaUserCircle, description: 'Account settings', category: 'personal' }
       );
     }
 
     return roleItems;
   };
 
-  const allNavItems = [...baseNavItems, ...getRoleNavItems()];
+  // Combine all navigation items with categories
+  const getAllNavItems = () => {
+    const roleItems = getRoleNavItems();
+    return {
+      main: navigationStructure.main,
+      information: navigationStructure.information,
+      professional: navigationStructure.professional,
+      personal: roleItems.filter(item => item.category === 'personal'),
+      admin: roleItems.filter(item => item.category === 'admin'),
+    };
+  };
 
-  // Network status monitoring
+  const navItems = getAllNavItems();
+
+  // Enhanced network status with notifications
   useEffect(() => {
     const handleOnline = () => {
       setIsOnline(true);
-      notificationService.notify({
-        type: 'success',
-        title: 'Connection Restored',
-        message: 'You are back online',
-        icon: FaCloudDownloadAlt,
-        priority: 'medium',
-        autoClose: 3000
-      });
+      if (wasOfflineRef.current) {
+        notificationService.connectionRestored();
+        wasOfflineRef.current = false;
+      }
     };
 
     const handleOffline = () => {
       setIsOnline(false);
-      notificationService.notify({
-        type: 'warning',
-        title: 'Connection Lost',
-        message: 'Working in offline mode',
-        icon: FaExclamationCircle,
-        priority: 'high',
-        persistent: true
-      });
+      if (!wasOfflineRef.current) {
+        notificationService.connectionLost();
+        wasOfflineRef.current = true;
+      }
     };
 
     window.addEventListener('online', handleOnline);
@@ -126,80 +174,71 @@ const Header = ({
     };
   }, []);
 
-  // Notification subscription
+  // Subscribe to notification service
   useEffect(() => {
-    const unsubscribe = notificationService.subscribe((updatedNotifications) => {
-      setNotifications(updatedNotifications);
-      setUnreadCount(updatedNotifications.filter(n => !n.read).length);
-    });
+    const handleUpdate = (items) => {
+      setNotifications(items);
+      setUnreadCount(items.filter(n => !n.read).length);
+    };
 
-    return unsubscribe;
+    const unsubscribe = notificationService.subscribe(handleUpdate);
+    const existing = notificationService.getNotifications();
+    handleUpdate(existing);
+
+    if (existing.length === 0) {
+      notificationService.systemUpdate('Welcome to DermaScan AI. Get started with your first skin analysis.');
+    }
+
+    return () => {
+      unsubscribe();
+    };
   }, []);
 
-  // Dynamic notification generation based on app state
+  // Push analysis completion notifications
   useEffect(() => {
-    // Analysis completion notification
-    if (currentAnalysis && !currentAnalysis.notificationSent) {
-      notificationService.analysisComplete(
-        currentAnalysis.diagnosis?.disease,
-        currentAnalysis.diagnosis?.confidence?.toFixed(1)
-      );
-      currentAnalysis.notificationSent = true;
+    if (!currentAnalysis) return;
+
+    const disease = currentAnalysis.diagnosis?.disease || 'skin condition';
+    const rawConfidence = currentAnalysis.diagnosis?.confidence ?? currentAnalysis.confidence ?? 0;
+    const confidencePercent = rawConfidence > 1 ? rawConfidence : rawConfidence * 100;
+    const fingerprint = `${disease}-${confidencePercent.toFixed(2)}`;
+
+    if (lastAnalysisNotificationRef.current === fingerprint) {
+      return;
     }
 
-    // Retraining status notifications
-    if (retrainingStatus) {
-      if (retrainingStatus.is_retraining && !retrainingStatus.notificationSent) {
-        notificationService.modelTrainingStart();
-        retrainingStatus.notificationSent = true;
-      }
+    lastAnalysisNotificationRef.current = fingerprint;
+    notificationService.analysisComplete(disease, confidencePercent.toFixed(1));
+  }, [currentAnalysis]);
 
-      if (!retrainingStatus.is_retraining && retrainingStatus.last_retraining && retrainingStatus.accuracy_improvement) {
-        notificationService.modelTrainingComplete(retrainingStatus.accuracy_improvement);
+  // Enhanced click outside handlers
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (notificationRef.current && !notificationRef.current.contains(event.target)) {
+        setNotificationOpen(false);
       }
-    }
-
-    // Community milestone notifications
-    if (communityInsights) {
-      const totalScans = communityInsights.weekly?.total_scans;
-      if (totalScans && totalScans % 1000 === 0) {
-        notificationService.communityMilestone(
-          `Amazing! Our community has completed ${totalScans.toLocaleString()} skin analyses!`
-        );
+      if (userMenuRef.current && !userMenuRef.current.contains(event.target)) {
+        setUserMenuOpen(false);
       }
-    }
+    };
 
-    // Security notifications for admins
-    if (user?.role === 'admin' && analysisHistory.length > 0) {
-      const recentAnalyses = analysisHistory.filter(
-        analysis => new Date(analysis.timestamp) > new Date(Date.now() - 5 * 60 * 1000)
-      );
-      
-      if (recentAnalyses.length > 10) {
-        notificationService.securityAlert();
-      }
-    }
-  }, [currentAnalysis, retrainingStatus, communityInsights, user, analysisHistory]);
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
+  // Enhanced logout handler
   const handleLogout = () => {
-    notificationService.notify({
-      type: 'info',
-      title: 'Signed Out',
-      message: 'You have been successfully signed out',
-      icon: FaSignOutAlt,
-      priority: 'low',
-      autoClose: 3000
-    });
-
     onLogout();
     navigate('/');
     setMobileMenuOpen(false);
     setNotificationOpen(false);
+    setUserMenuOpen(false);
   };
 
+  // Enhanced notification handlers
   const handleNotificationClick = (notification) => {
     notificationService.markAsRead(notification.id);
-    
+
     if (notification.action) {
       switch (notification.action.type) {
         case 'view_results':
@@ -223,60 +262,64 @@ const Header = ({
 
   const clearAllNotifications = () => {
     notificationService.clearAll();
+    setNotificationOpen(false);
   };
 
   const markAllAsRead = () => {
-    notifications.forEach(notif => {
+    notificationService.getNotifications().forEach((notif) => {
       if (!notif.read) {
         notificationService.markAsRead(notif.id);
       }
     });
   };
 
+  // Enhanced notification styling
   const getNotificationIcon = (notification) => {
     const IconComponent = notification.icon || FaBell;
-    switch (notification.type) {
-      case 'success':
-        return <IconComponent className="text-green-500 text-lg" />;
-      case 'warning':
-        return <IconComponent className="text-yellow-500 text-lg" />;
-      case 'error':
-        return <IconComponent className="text-red-500 text-lg" />;
-      case 'critical':
-        return <IconComponent className="text-red-600 text-lg animate-pulse" />;
-      default:
-        return <IconComponent className="text-blue-500 text-lg" />;
-    }
+    const iconConfig = {
+      success: { color: 'text-emerald-500', bg: 'bg-emerald-100' },
+      warning: { color: 'text-amber-500', bg: 'bg-amber-100' },
+      error: { color: 'text-rose-500', bg: 'bg-rose-100' },
+      critical: { color: 'text-rose-600', bg: 'bg-rose-100' },
+      info: { color: 'text-sky-500', bg: 'bg-sky-100' }
+    };
+
+    const config = iconConfig[notification.type] || iconConfig.info;
+    
+    return (
+      <div className={`p-2 rounded-xl ${config.bg}`}>
+        <IconComponent className={`text-lg ${config.color}`} />
+      </div>
+    );
   };
 
   const getNotificationColor = (notification) => {
-    switch (notification.type) {
-      case 'success':
-        return 'border-l-4 border-l-green-500 bg-gradient-to-r from-green-50 to-white';
-      case 'warning':
-        return 'border-l-4 border-l-yellow-500 bg-gradient-to-r from-yellow-50 to-white';
-      case 'error':
-        return 'border-l-4 border-l-red-500 bg-gradient-to-r from-red-50 to-white';
-      case 'critical':
-        return 'border-l-4 border-l-red-600 bg-gradient-to-r from-red-100 to-white animate-pulse';
-      default:
-        return 'border-l-4 border-l-blue-500 bg-gradient-to-r from-blue-50 to-white';
-    }
+    const colorConfig = {
+      success: 'border-l-4 border-l-emerald-500 bg-gradient-to-r from-emerald-50/90 to-white/90',
+      warning: 'border-l-4 border-l-amber-500 bg-gradient-to-r from-amber-50/90 to-white/90',
+      error: 'border-l-4 border-l-rose-500 bg-gradient-to-r from-rose-50/90 to-white/90',
+      critical: 'border-l-4 border-l-rose-600 bg-gradient-to-r from-rose-100/90 to-white/90',
+      info: 'border-l-4 border-l-sky-500 bg-gradient-to-r from-sky-50/90 to-white/90'
+    };
+
+    return colorConfig[notification.type] || colorConfig.info;
   };
 
   const getPriorityBadge = (priority) => {
-    switch (priority) {
-      case 'critical':
-        return <span className="bg-red-100 text-red-800 text-xs px-2 py-1 rounded-full">Critical</span>;
-      case 'high':
-        return <span className="bg-orange-100 text-orange-800 text-xs px-2 py-1 rounded-full">High</span>;
-      case 'medium':
-        return <span className="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded-full">Medium</span>;
-      case 'low':
-        return <span className="bg-gray-100 text-gray-800 text-xs px-2 py-1 rounded-full">Low</span>;
-      default:
-        return null;
-    }
+    const badgeConfig = {
+      critical: { bg: 'bg-rose-100', text: 'text-rose-800', border: 'border-rose-200', label: 'Critical' },
+      high: { bg: 'bg-amber-100', text: 'text-amber-800', border: 'border-amber-200', label: 'High' },
+      medium: { bg: 'bg-sky-100', text: 'text-sky-800', border: 'border-sky-200', label: 'Medium' },
+      low: { bg: 'bg-slate-100', text: 'text-slate-800', border: 'border-slate-200', label: 'Low' }
+    };
+
+    const config = badgeConfig[priority] || badgeConfig.medium;
+    
+    return (
+      <span className={`${config.bg} ${config.text} ${config.border} text-xs px-2 py-1 rounded-full font-semibold border`}>
+        {config.label}
+      </span>
+    );
   };
 
   const formatTime = (timestamp) => {
@@ -293,132 +336,191 @@ const Header = ({
     return new Date(timestamp).toLocaleDateString();
   };
 
-  // Auto-close non-persistent notifications after delay
-  useEffect(() => {
-    notifications.forEach(notification => {
-      if (!notification.persistent && notification.autoClose) {
-        const timer = setTimeout(() => {
-          notificationService.clear(notification.id);
-        }, notification.autoClose);
-
-        return () => clearTimeout(timer);
+  // Animation variants
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.1
       }
-    });
-  }, [notifications]);
+    }
+  };
 
-  // Click outside handler for dropdowns
-  useEffect(() => {
-    const handleClickOutside = (event) => {
-      if (notificationRef.current && !notificationRef.current.contains(event.target)) {
-        setNotificationOpen(false);
+  const itemVariants = {
+    hidden: { y: -20, opacity: 0 },
+    visible: {
+      y: 0,
+      opacity: 1,
+      transition: {
+        type: "spring",
+        stiffness: 300,
+        damping: 24
       }
-    };
-
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, []);
+    }
+  };
 
   return (
-    <header className="bg-gradient-to-r from-blue-600 via-blue-700 to-purple-700 shadow-2xl sticky top-0 z-50 transition-all duration-300 border-b border-blue-400/30 backdrop-blur-sm bg-white/5">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between h-20 items-center">
-          {/* Logo */}
+    <motion.header 
+      className={`bg-white/95 backdrop-blur-xl border-b border-slate-200/60 sticky top-0 z-50 transition-all duration-500 ${
+        isScrolled 
+          ? 'shadow-xl h-16' 
+          : 'shadow-lg h-20'
+      }`}
+      initial={{ y: -100 }}
+      animate={{ y: 0 }}
+      transition={{ type: "spring", stiffness: 120, damping: 20 }}
+      style={{
+        backdropFilter: 'blur(20px)',
+        WebkitBackdropFilter: 'blur(20px)'
+      }}
+    >
+      <div className="max-w-8xl mx-auto px-6 lg:px-8">
+        <div className={`flex justify-between items-center transition-all duration-300 ${
+          isScrolled ? 'h-16' : 'h-20'
+        }`}>
+          
+          {/* Enhanced Logo Section */}
           <motion.div 
             className="flex items-center group flex-shrink-0"
             whileHover={{ scale: 1.02 }}
             transition={{ type: "spring", stiffness: 400, damping: 10 }}
           >
-            <Link to="/" className="flex items-center">
+            <Link to="/" className="flex items-center space-x-4">
               <div className="relative">
                 <motion.div 
-                  className="w-12 h-12 rounded-2xl bg-white shadow-2xl flex items-center justify-center border-2 border-blue-200"
+                  className={`rounded-2xl bg-gradient-to-br from-blue-600 to-teal-500 shadow-2xl flex items-center justify-center border border-blue-400/30 ${
+                    isScrolled ? 'w-10 h-10' : 'w-12 h-12'
+                  }`}
                   whileHover={{ rotate: 5, scale: 1.1 }}
                   transition={{ type: "spring", stiffness: 300, damping: 10 }}
                 >
-                  <FaHeartbeat className="text-blue-600 text-xl" />
+                  <FaBrain className="text-white text-lg" />
                 </motion.div>
                 {isOnline && (
                   <motion.div 
-                    className="absolute -top-1 -right-1 w-3 h-3 bg-green-400 rounded-full border-2 border-white"
+                    className="absolute -top-1 -right-1 w-3 h-3 bg-emerald-400 rounded-full border-2 border-white shadow-lg"
                     initial={{ scale: 0 }}
                     animate={{ scale: 1 }}
                     transition={{ delay: 0.5 }}
                   />
                 )}
               </div>
-              <div className="ml-4">
-                <h1 className="text-2xl md:text-3xl font-black text-white tracking-tight drop-shadow-2xl">
-                  DermaScan<span className="text-green-300">AI</span>
-                </h1>
-                <p className="text-xs text-white/90 mt-1 font-semibold hidden sm:block tracking-wide">
+              <div className={`transition-all duration-300 ${isScrolled ? 'scale-95' : 'scale-100'}`}>
+                <motion.h1 
+                  className="text-2xl lg:text-3xl font-black bg-gradient-to-r from-slate-800 to-blue-700 bg-clip-text text-transparent tracking-tight"
+                  whileHover={{ scale: 1.02 }}
+                >
+                  DermaScan<span className="text-blue-500">AI</span>
+                </motion.h1>
+                <motion.p 
+                  className="text-xs text-slate-500 mt-1 font-medium hidden lg:block tracking-wide"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ delay: 0.3 }}
+                >
                   Advanced Skin Health Intelligence
-                </p>
+                </motion.p>
               </div>
             </Link>
           </motion.div>
 
-          {/* Desktop Navigation */}
-          <nav className="hidden lg:flex items-center space-x-1">
-            {allNavItems.map((item) => {
-              const IconComponent = item.icon;
-              const isActive = location.pathname === item.path;
-              
-              return (
-                <motion.div
-                  key={item.name}
-                  whileHover={{ y: -2 }}
-                  transition={{ type: "spring", stiffness: 400, damping: 10 }}
-                >
-                  <Link
-                    to={item.path}
-                    className={`relative px-4 py-3 rounded-xl font-bold transition-all duration-200 flex items-center space-x-2 group ${
-                      isActive 
-                        ? 'text-white bg-white/25 shadow-lg shadow-blue-500/25' 
-                        : 'text-white/90 hover:text-white hover:bg-white/15 hover:shadow-md'
-                    }`}
-                  >
-                    <IconComponent className="text-sm" />
-                    <span className="text-sm">{item.name}</span>
-                    
-                    {/* Tooltip */}
-                    <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 bg-gray-900 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200 whitespace-nowrap">
-                      {item.description}
-                      <div className="absolute top-full left-1/2 transform -translate-x-1/2 border-4 border-transparent border-t-gray-900"></div>
-                    </div>
+          {/* Enhanced Desktop Navigation - Better Spacing and Layout */}
+          <nav className="hidden xl:flex items-center space-x-2">
+            <motion.div 
+              className="flex items-center space-x-2"
+              variants={containerVariants}
+              initial="hidden"
+              animate="visible"
+            >
+              {/* Main Navigation Items */}
+              {Object.entries(navItems).map(([, items]) => (
+                items.length > 0 && items.map((item) => {
+                  const IconComponent = item.icon;
+                  const isActive = location.pathname === item.path;
+                  
+                  return (
+                    <motion.div
+                      key={item.name}
+                      variants={itemVariants}
+                      whileHover={{ y: -2 }}
+                      whileTap={{ y: 0 }}
+                      transition={{ type: "spring", stiffness: 400, damping: 10 }}
+                    >
+                      <Link
+                        to={item.path}
+                        className={`relative px-5 py-3 rounded-xl font-semibold transition-all duration-300 flex items-center space-x-3 group ${
+                          isActive 
+                            ? 'text-blue-700 bg-blue-50 border border-blue-200 shadow-lg' 
+                            : 'text-slate-600 hover:text-blue-600 hover:bg-slate-50/80 hover:shadow-md'
+                        }`}
+                      >
+                        <motion.div
+                          whileHover={{ scale: 1.1 }}
+                          transition={{ type: "spring", stiffness: 400, damping: 10 }}
+                        >
+                          <IconComponent className={`text-base ${isActive ? 'text-blue-600' : 'text-slate-500 group-hover:text-blue-500'}`} />
+                        </motion.div>
+                        <span className="text-sm font-medium">{item.name}</span>
+                        
+                        {/* Badge for special items */}
+                        {item.badge && (
+                          <span className={`text-xs px-2 py-1 rounded-full font-bold ${
+                            item.badge === 'AI' ? 'bg-gradient-to-r from-purple-500 to-pink-500 text-white shadow-sm' :
+                            item.badge === 'PRO' ? 'bg-gradient-to-r from-blue-500 to-teal-500 text-white shadow-sm' :
+                            item.badge === 'ADMIN' ? 'bg-gradient-to-r from-purple-600 to-purple-700 text-white shadow-sm' :
+                            'bg-slate-200 text-slate-700'
+                          }`}>
+                            {item.badge}
+                          </span>
+                        )}
 
-                    {/* Active indicator */}
-                    {isActive && (
-                      <motion.div
-                        layoutId="activeIndicator"
-                        className="absolute inset-0 border-2 border-white/40 rounded-xl shadow-inner"
-                        transition={{ type: "spring", stiffness: 300, damping: 30 }}
-                      />
-                    )}
-                  </Link>
-                </motion.div>
-              );
-            })}
+                        {/* Enhanced Tooltip */}
+                        <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-3 px-3 py-2 bg-slate-800 text-white text-xs rounded-lg opacity-0 group-hover:opacity-100 transition-all duration-300 whitespace-nowrap shadow-xl backdrop-blur-sm z-50 pointer-events-none">
+                          {item.description}
+                          <div className="absolute top-full left-1/2 transform -translate-x-1/2 border-4 border-transparent border-t-slate-800"></div>
+                        </div>
+
+                        {/* Active indicator */}
+                        {isActive && (
+                          <motion.div
+                            layoutId="activeIndicator"
+                            className="absolute inset-0 border-2 border-blue-300 rounded-xl shadow-inner"
+                            transition={{ type: "spring", stiffness: 300, damping: 30 }}
+                          />
+                        )}
+                      </Link>
+                    </motion.div>
+                  );
+                })
+              ))}
+            </motion.div>
           </nav>
 
-          {/* Right Section - Status, Notifications & User */}
+          {/* Enhanced Right Section - Better Desktop Layout */}
           <div className="flex items-center space-x-4">
-            {/* Online Status Indicator */}
+            {/* Online Status Indicator - Desktop Optimized */}
             <motion.div 
-              className="hidden md:flex items-center space-x-2 px-3 py-1 rounded-full border border-white/20 bg-white/10 backdrop-blur-sm"
+              className="hidden 2xl:flex items-center space-x-3 px-4 py-2 rounded-xl border border-slate-200 bg-white/80 backdrop-blur-sm shadow-sm"
               initial={{ opacity: 0, scale: 0.8 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ delay: 0.2 }}
+              whileHover={{ scale: 1.05, borderColor: "rgb(203,213,225)" }}
             >
-              <div className={`w-2 h-2 rounded-full ${isOnline ? 'bg-green-400 animate-pulse' : 'bg-red-400'}`} />
-              <span className="text-white/80 text-sm font-medium">
-                {isOnline ? 'Online' : 'Offline'}
+              <motion.div 
+                className={`w-2 h-2 rounded-full ${isOnline ? 'bg-emerald-400' : 'bg-rose-400'}`}
+                animate={isOnline ? { scale: [1, 1.2, 1] } : {}}
+                transition={isOnline ? { duration: 2, repeat: Infinity } : {}}
+              />
+              <span className="text-slate-600 text-sm font-medium">
+                {isOnline ? 'System Online' : 'Offline Mode'}
               </span>
             </motion.div>
 
-            {/* Retraining Status Indicator for Admins/Doctors */}
+            {/* Retraining Status Indicator - Desktop Optimized */}
             {(user?.role === 'admin' || user?.role === 'doctor') && retrainingStatus?.is_retraining && (
               <motion.div 
-                className="hidden md:flex items-center space-x-2 bg-yellow-500/30 border border-yellow-400/40 rounded-full px-4 py-2 backdrop-blur-sm"
+                className="hidden lg:flex items-center space-x-3 bg-gradient-to-r from-amber-50 to-orange-50 border border-amber-200 rounded-xl px-4 py-2 backdrop-blur-sm shadow-sm"
                 initial={{ scale: 0 }}
                 animate={{ scale: 1 }}
                 whileHover={{ scale: 1.05 }}
@@ -427,144 +529,186 @@ const Header = ({
                   animate={{ rotate: 360 }}
                   transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
                 >
-                  <FaSync className="text-yellow-200 text-sm" />
+                  <FaSync className="text-amber-600 text-sm" />
                 </motion.div>
-                <span className="text-yellow-200 text-sm font-semibold">
-                  Training {retrainingStatus.progress}%
-                </span>
+                <div className="flex flex-col">
+                  <span className="text-amber-700 text-sm font-semibold">
+                    Model Training
+                  </span>
+                  <span className="text-amber-600 text-xs">
+                    {retrainingStatus.progress || 0}% Complete
+                  </span>
+                </div>
               </motion.div>
             )}
 
-            {/* Notifications Bell */}
+            {/* Enhanced Notifications Bell - Desktop Optimized */}
             {user && (
               <div className="relative" ref={notificationRef}>
                 <motion.button
                   onClick={() => setNotificationOpen(!notificationOpen)}
-                  className="relative p-3 text-white/90 hover:text-white hover:bg-white/10 rounded-xl transition-all duration-200 backdrop-blur-sm border border-transparent hover:border-white/20"
-                  whileHover={{ scale: 1.05 }}
+                  className="relative p-3 text-slate-600 hover:text-blue-600 rounded-xl transition-all duration-300 backdrop-blur-sm border border-transparent hover:border-slate-200 shadow-sm hover:shadow-md bg-white/80 hover:bg-white group"
+                  whileHover={{ scale: 1.05, y: -1 }}
                   whileTap={{ scale: 0.95 }}
+                  aria-label={notificationOpen ? 'Close notifications' : 'Open notifications'}
+                  title={notificationOpen ? 'Close notifications' : 'Open notifications'}
                 >
-                  <FaBell className="text-lg" />
+                  <motion.div
+                    animate={unreadCount > 0 ? { rotate: [0, -10, 10, 0] } : {}}
+                    transition={{ duration: 0.5 }}
+                  >
+                    <FaBell className="text-xl group-hover:scale-110 transition-transform duration-200" />
+                  </motion.div>
                   {unreadCount > 0 && (
                     <motion.span 
-                      className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center font-black shadow-lg"
+                      className="absolute -top-1 -right-1 bg-rose-500 text-white text-xs rounded-full w-6 h-6 flex items-center justify-center font-bold shadow-lg border-2 border-white"
                       initial={{ scale: 0 }}
                       animate={{ scale: 1 }}
                       transition={{ type: "spring", stiffness: 500, damping: 15 }}
+                      whileHover={{ scale: 1.2 }}
                     >
                       {unreadCount > 9 ? '9+' : unreadCount}
                     </motion.span>
                   )}
                 </motion.button>
 
-                {/* Notifications Dropdown */}
+                {/* Enhanced Notifications Dropdown - Desktop Optimized */}
                 <AnimatePresence>
                   {notificationOpen && (
                     <motion.div
-                      initial={{ opacity: 0, scale: 0.95, y: -10 }}
+                      initial={{ opacity: 0, scale: 0.9, y: -20 }}
                       animate={{ opacity: 1, scale: 1, y: 0 }}
-                      exit={{ opacity: 0, scale: 0.95, y: -10 }}
-                      className="absolute right-0 mt-2 w-96 bg-white rounded-2xl shadow-2xl border border-gray-200/80 z-50 backdrop-blur-sm bg-white/95"
+                      exit={{ opacity: 0, scale: 0.9, y: -20 }}
+                      transition={{ type: "spring", stiffness: 300, damping: 30 }}
+                      className="absolute right-0 mt-3 w-96 bg-white/95 backdrop-blur-xl rounded-2xl shadow-2xl border border-slate-200/60 z-50 overflow-hidden"
+                      style={{
+                        backdropFilter: 'blur(20px)',
+                        WebkitBackdropFilter: 'blur(20px)'
+                      }}
                     >
-                      <div className="p-4 border-b border-gray-100">
+                      {/* Header */}
+                      <div className="p-6 border-b border-slate-200/60 bg-gradient-to-r from-slate-50 to-white/80">
                         <div className="flex justify-between items-center">
                           <div>
-                            <h3 className="font-bold text-gray-800 text-lg">Notifications</h3>
-                            <p className="text-sm text-gray-500">
+                            <h3 className="font-bold text-slate-800 text-lg">Notifications</h3>
+                            <p className="text-sm text-slate-500">
                               {notifications.length} {notifications.length === 1 ? 'notification' : 'notifications'}
                             </p>
                           </div>
                           <div className="flex space-x-2">
                             {unreadCount > 0 && (
-                              <button
+                              <motion.button
                                 onClick={markAllAsRead}
-                                className="text-blue-600 hover:text-blue-800 text-sm font-medium px-3 py-1 rounded-lg hover:bg-blue-50 transition"
+                                className="text-blue-600 hover:text-blue-800 text-sm font-medium px-3 py-1 rounded-lg hover:bg-blue-50 transition-all duration-200 shadow-sm border border-transparent hover:border-blue-200"
+                                whileHover={{ scale: 1.05 }}
+                                whileTap={{ scale: 0.95 }}
                               >
                                 Mark all read
-                              </button>
+                              </motion.button>
                             )}
                             {notifications.length > 0 && (
-                              <button
+                              <motion.button
                                 onClick={clearAllNotifications}
-                                className="text-gray-500 hover:text-gray-700 text-sm font-medium px-3 py-1 rounded-lg hover:bg-gray-100 transition"
+                                className="text-slate-500 hover:text-slate-700 text-sm font-medium px-3 py-1 rounded-lg hover:bg-slate-100 transition-all duration-200 shadow-sm border border-transparent hover:border-slate-200"
+                                whileHover={{ scale: 1.05 }}
+                                whileTap={{ scale: 0.95 }}
                               >
                                 Clear all
-                              </button>
+                              </motion.button>
                             )}
                           </div>
                         </div>
                       </div>
 
+                      {/* Notifications List */}
                       <div className="max-h-96 overflow-y-auto">
                         {notifications.length > 0 ? (
-                          <div className="p-2">
+                          <motion.div 
+                            className="p-2"
+                            initial="hidden"
+                            animate="visible"
+                            variants={containerVariants}
+                          >
                             {notifications.map((notification) => (
                               <motion.div
                                 key={notification.id}
-                                initial={{ opacity: 0, x: -20 }}
-                                animate={{ opacity: 1, x: 0 }}
-                                exit={{ opacity: 0, x: 20 }}
-                                className={`p-4 rounded-xl mb-2 cursor-pointer transform transition-all duration-200 hover:scale-[1.02] hover:shadow-md ${getNotificationColor(notification)} ${
+                                variants={itemVariants}
+                                className={`p-4 rounded-xl mb-2 cursor-pointer transform transition-all duration-300 hover:scale-[1.02] hover:shadow-lg ${getNotificationColor(notification)} ${
                                   notification.read ? 'opacity-75' : 'opacity-100'
                                 }`}
                                 onClick={() => handleNotificationClick(notification)}
+                                whileHover={{ y: -2 }}
                               >
                                 <div className="flex items-start space-x-3">
-                                  <div className="flex-shrink-0 mt-1">
+                                  <div className="flex-shrink-0">
                                     {getNotificationIcon(notification)}
                                   </div>
                                   <div className="flex-1 min-w-0">
                                     <div className="flex items-center justify-between mb-1">
-                                      <p className="font-semibold text-gray-800 text-sm">
+                                      <p className="font-semibold text-slate-800 text-sm">
                                         {notification.title}
                                       </p>
                                       {notification.priority && getPriorityBadge(notification.priority)}
                                     </div>
-                                    <p className="text-gray-600 text-sm leading-relaxed">
+                                    <p className="text-slate-600 text-sm leading-relaxed">
                                       {notification.message}
                                     </p>
                                     <div className="flex items-center justify-between mt-2">
-                                      <p className="text-gray-400 text-xs">
+                                      <p className="text-slate-400 text-xs">
                                         {formatTime(notification.timestamp)}
                                       </p>
                                       {!notification.read && (
-                                        <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+                                        <motion.div 
+                                          className="w-2 h-2 bg-blue-500 rounded-full shadow-sm"
+                                          animate={{ scale: [1, 1.2, 1] }}
+                                          transition={{ duration: 2, repeat: Infinity }}
+                                        />
                                       )}
                                     </div>
                                   </div>
-                                  <button
+                                  <motion.button
                                     onClick={(e) => clearNotification(notification.id, e)}
-                                    className="flex-shrink-0 text-gray-400 hover:text-gray-600 p-1 rounded-full hover:bg-gray-100 transition"
+                                    className="flex-shrink-0 text-slate-400 hover:text-slate-600 p-1 rounded-full hover:bg-slate-100 transition-all duration-200"
+                                    whileHover={{ scale: 1.1, rotate: 90 }}
+                                    whileTap={{ scale: 0.9 }}
                                   >
                                     <FaTimes size={14} />
-                                  </button>
+                                  </motion.button>
                                 </div>
                               </motion.div>
                             ))}
-                          </div>
+                          </motion.div>
                         ) : (
                           <motion.div 
                             className="p-8 text-center"
-                            initial={{ opacity: 0 }}
-                            animate={{ opacity: 1 }}
+                            initial={{ opacity: 0, y: 20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ delay: 0.2 }}
                           >
-                            <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                              <FaBell className="text-gray-300 text-2xl" />
-                            </div>
-                            <p className="text-gray-500 text-sm font-medium">No notifications</p>
-                            <p className="text-gray-400 text-xs mt-1">We'll notify you when something arrives</p>
+                            <motion.div 
+                              className="w-16 h-16 bg-slate-100 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-inner border border-slate-200"
+                              animate={{ scale: [1, 1.05, 1] }}
+                              transition={{ duration: 2, repeat: Infinity }}
+                            >
+                              <FaBell className="text-slate-400 text-2xl" />
+                            </motion.div>
+                            <p className="text-slate-500 text-sm font-medium">No notifications</p>
+                            <p className="text-slate-400 text-xs mt-1">We'll notify you when something arrives</p>
                           </motion.div>
                         )}
                       </div>
 
+                      {/* Footer */}
                       {notifications.length > 0 && (
-                        <div className="p-3 border-t border-gray-100 bg-gray-50 rounded-b-2xl">
-                          <button
+                        <div className="p-4 border-t border-slate-200/60 bg-gradient-to-r from-slate-50 to-white/80 rounded-b-2xl">
+                          <motion.button
                             onClick={clearAllNotifications}
-                            className="w-full text-center text-gray-500 hover:text-gray-700 text-sm font-medium py-2 rounded-lg hover:bg-gray-200 transition"
+                            className="w-full text-center text-slate-500 hover:text-slate-700 text-sm font-medium py-2 rounded-lg hover:bg-slate-200 transition-all duration-200 shadow-sm border border-transparent hover:border-slate-300"
+                            whileHover={{ scale: 1.02 }}
+                            whileTap={{ scale: 0.98 }}
                           >
                             Clear all notifications
-                          </button>
+                          </motion.button>
                         </div>
                       )}
                     </motion.div>
@@ -573,206 +717,132 @@ const Header = ({
               </div>
             )}
 
-            {/* User Role Badge */}
+            {/* Enhanced User Menu - Desktop Optimized */}
             {user && (
+              <div className="relative" ref={userMenuRef}>
+                <motion.button
+                  onClick={() => setUserMenuOpen(!userMenuOpen)}
+                  className="flex items-center space-x-4 p-2 rounded-xl hover:bg-slate-50 transition-all duration-300 group border border-transparent hover:border-slate-200"
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  aria-haspopup="menu"
+                  aria-expanded={userMenuOpen}
+                  aria-label={userMenuOpen ? 'Close user menu' : 'Open user menu'}
+                >
+                  <div className="flex items-center space-x-3">
+                    <div className="text-left hidden xl:block">
+                      <p className="text-sm font-semibold text-slate-800">{user.name || 'User'}</p>
+                      <p className="text-xs text-slate-500 capitalize">{user.role}</p>
+                    </div>
+                    <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500 to-teal-500 flex items-center justify-center text-white text-sm font-bold shadow-lg">
+                      {user.name?.charAt(0) || 'U'}
+                    </div>
+                    <FaChevronDown className={`text-slate-400 transition-transform duration-200 ${userMenuOpen ? 'rotate-180' : ''}`} />
+                  </div>
+                </motion.button>
+
+                <AnimatePresence>
+                  {userMenuOpen && (
+                    <motion.div
+                      initial={{ opacity: 0, scale: 0.9, y: -10 }}
+                      animate={{ opacity: 1, scale: 1, y: 0 }}
+                      exit={{ opacity: 0, scale: 0.9, y: -10 }}
+                      transition={{ type: "spring", stiffness: 300, damping: 30 }}
+                      className="absolute right-0 mt-3 w-64 bg-white/95 backdrop-blur-xl rounded-2xl shadow-2xl border border-slate-200/60 z-50 overflow-hidden"
+                    >
+                      <div className="p-4 border-b border-slate-200/60 bg-gradient-to-r from-slate-50 to-white/80">
+                        <div className="flex items-center space-x-3">
+                          <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-blue-500 to-teal-500 flex items-center justify-center text-white font-bold shadow-lg">
+                            {user.name?.charAt(0) || 'U'}
+                          </div>
+                          <div>
+                            <p className="font-semibold text-slate-800">{user.name || 'User'}</p>
+                            <p className="text-sm text-slate-500">{user.email}</p>
+                            <p className="text-xs text-slate-400 capitalize mt-1">{user.role}</p>
+                          </div>
+                        </div>
+                      </div>
+                      <div className="p-2">
+                        <Link
+                          to="/profile"
+                          className="flex items-center space-x-3 p-3 rounded-xl hover:bg-slate-50 transition-all duration-200 group"
+                          onClick={() => setUserMenuOpen(false)}
+                        >
+                          <FaUserCircle className="text-slate-500 group-hover:text-blue-500" />
+                          <span className="group-hover:text-blue-600">My Profile</span>
+                        </Link>
+                        <Link
+                          to="/history"
+                          className="flex items-center space-x-3 p-3 rounded-xl hover:bg-slate-50 transition-all duration-200 group"
+                          onClick={() => setUserMenuOpen(false)}
+                        >
+                          <FaHistory className="text-slate-500 group-hover:text-blue-500" />
+                          <span className="group-hover:text-blue-600">Analysis History</span>
+                        </Link>
+                        <button
+                          onClick={handleLogout}
+                          className="flex items-center space-x-3 p-3 rounded-xl hover:bg-rose-50 text-rose-600 w-full transition-all duration-200 group mt-2"
+                        >
+                          <FaSignOutAlt className="group-hover:scale-110 transition-transform" />
+                          <span className="font-medium">Sign Out</span>
+                        </button>
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
+            )}
+
+            {/* Enhanced Auth Buttons - Desktop Optimized */}
+            {!user && (
               <motion.div 
-                className="hidden md:flex items-center space-x-2 bg-white/15 rounded-xl px-4 py-2 border border-white/25 backdrop-blur-sm"
+                className="flex items-center space-x-3"
                 initial={{ opacity: 0, x: 20 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: 0.3 }}
               >
-                {user.role === 'admin' && <FaShieldAlt className="text-white text-sm" />}
-                {user.role === 'doctor' && <FaUserMd className="text-white text-sm" />}
-                {user.role === 'user' && <FaUserCircle className="text-white text-sm" />}
-                <span className="text-white text-sm font-semibold capitalize">
-                  {user.role}
-                </span>
+                <Link
+                  to="/auth?tab=login"
+                  className="text-slate-600 hover:text-blue-600 font-semibold px-4 py-2 rounded-xl transition-all duration-300 hover:bg-slate-50"
+                >
+                  Sign In
+                </Link>
+                <motion.div 
+                  whileHover={{ scale: 1.05 }} 
+                  whileTap={{ scale: 0.95 }}
+                >
+                  <Link
+                    to="/auth?tab=register"
+                    className="bg-gradient-to-r from-blue-500 to-teal-600 hover:from-blue-600 hover:to-teal-700 text-white px-6 py-3 rounded-xl font-semibold shadow-lg transition-all duration-300 flex items-center space-x-2 border border-blue-500 hover:border-blue-600 hover:shadow-xl"
+                  >
+                    <FaSignInAlt className="text-sm" />
+                    <span>Get Started</span>
+                  </Link>
+                </motion.div>
               </motion.div>
             )}
 
-            {/* Auth Buttons */}
-            <div className="flex items-center space-x-3">
-              {user ? (
-                <>
-                  <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-                    <Link
-                      to="/profile"
-                      className="hidden md:flex items-center text-white hover:text-green-300 transition-all font-semibold bg-white/15 hover:bg-white/25 px-4 py-2 rounded-xl border border-white/25 backdrop-blur-sm"
-                    >
-                      <FaUserCircle className="mr-2" /> 
-                      {user.name || 'Profile'}
-                    </Link>
-                  </motion.div>
-                  <motion.button
-                    onClick={handleLogout}
-                    className="bg-white hover:bg-green-50 text-blue-700 px-4 py-2 rounded-xl font-semibold shadow-lg transition-all flex items-center border border-green-200 hover:border-green-300 hover:shadow-xl"
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
-                  >
-                    <FaSignOutAlt className="mr-2" /> 
-                    <span className="hidden sm:inline">Logout</span>
-                  </motion.button>
-                </>
-              ) : (
-                <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-                  <Link
-                    to="/auth"
-                    className="bg-white hover:bg-green-50 text-blue-700 px-4 py-2 rounded-xl font-semibold shadow-lg transition-all flex items-center border border-green-200 hover:border-green-300 hover:shadow-xl"
-                  >
-                    <FaSignInAlt className="mr-2" /> 
-                    <span className="hidden sm:inline">Sign In</span>
-                  </Link>
-                </motion.div>
-              )}
-
-              {/* Mobile Menu Button */}
-              <motion.button
-                className="lg:hidden text-white hover:text-green-300 transition p-3 hover:bg-white/10 rounded-xl border border-transparent hover:border-white/20"
-                onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
+            {/* Mobile Menu Button - Hidden on Desktop */}
+            <motion.button
+              className="xl:hidden text-slate-600 hover:text-blue-600 transition-all duration-300 p-3 hover:bg-slate-100 rounded-xl border border-transparent hover:border-slate-200 shadow-sm"
+              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+              whileHover={{ scale: 1.05, y: -1 }}
+              whileTap={{ scale: 0.95 }}
+              aria-label={mobileMenuOpen ? 'Close menu' : 'Open menu'}
+              aria-expanded={mobileMenuOpen}
+              aria-controls="mobile-menu"
+            >
+              <motion.div
+                animate={mobileMenuOpen ? { rotate: 90 } : { rotate: 0 }}
+                transition={{ duration: 0.3 }}
               >
                 <FaBars className="text-xl" />
-              </motion.button>
-            </div>
+              </motion.div>
+            </motion.button>
           </div>
         </div>
       </div>
-
-      {/* Mobile Menu */}
-      <AnimatePresence>
-        {mobileMenuOpen && (
-          <motion.div
-            initial={{ opacity: 0, height: 0 }}
-            animate={{ opacity: 1, height: 'auto' }}
-            exit={{ opacity: 0, height: 0 }}
-            className="lg:hidden bg-white/98 backdrop-blur-md border-t border-blue-200 shadow-2xl overflow-hidden"
-          >
-            <div className="px-4 pt-4 pb-6 space-y-2">
-              {/* User Info in Mobile Menu */}
-              {user && (
-                <motion.div 
-                  className="px-4 py-4 bg-gradient-to-r from-blue-50 to-purple-50 rounded-2xl mb-3 border border-blue-100 shadow-sm"
-                  initial={{ opacity: 0, y: -10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                >
-                  <div className="flex items-center space-x-3">
-                    <div className="w-12 h-12 bg-gradient-to-br from-blue-100 to-purple-100 rounded-xl flex items-center justify-center shadow-sm">
-                      {user.role === 'admin' && <FaShieldAlt className="text-blue-600 text-lg" />}
-                      {user.role === 'doctor' && <FaUserMd className="text-blue-600 text-lg" />}
-                      {user.role === 'user' && <FaUserCircle className="text-blue-600 text-lg" />}
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="font-bold text-blue-900 truncate text-sm">
-                        {user.name || 'User'}
-                      </p>
-                      <p className="text-blue-700 text-xs capitalize font-medium">
-                        {user.role} • {user.email}
-                      </p>
-                      <div className="flex items-center space-x-2 mt-1">
-                        <div className={`w-2 h-2 rounded-full ${isOnline ? 'bg-green-400' : 'bg-red-400'}`} />
-                        <span className="text-blue-600 text-xs">
-                          {isOnline ? 'Online' : 'Offline'}
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-                </motion.div>
-              )}
-
-              {/* Mobile Navigation Items */}
-              {allNavItems.map((item, index) => {
-                const IconComponent = item.icon;
-                const isActive = location.pathname === item.path;
-                
-                return (
-                  <motion.div
-                    key={item.name}
-                    initial={{ opacity: 0, x: -20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: index * 0.1 }}
-                  >
-                    <Link
-                      to={item.path}
-                      className={`flex items-center space-x-4 px-4 py-3 rounded-xl text-base font-semibold transition-all ${
-                        isActive
-                          ? 'bg-blue-100 text-blue-700 border-l-4 border-blue-500 shadow-sm'
-                          : 'text-gray-700 hover:text-blue-600 hover:bg-blue-50'
-                      }`}
-                      onClick={() => setMobileMenuOpen(false)}
-                    >
-                      <IconComponent className={`text-lg ${isActive ? 'text-blue-600' : 'text-gray-500'}`} />
-                      <div className="flex-1">
-                        <span>{item.name}</span>
-                        <p className="text-xs text-gray-500 font-normal mt-1">
-                          {item.description}
-                        </p>
-                      </div>
-                      {isActive && (
-                        <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
-                      )}
-                    </Link>
-                  </motion.div>
-                );
-              })}
-
-              {/* Mobile Notifications Preview */}
-              {user && notifications.length > 0 && (
-                <motion.div 
-                  className="px-4 py-3"
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  transition={{ delay: 0.5 }}
-                >
-                  <div className="bg-yellow-50 border border-yellow-200 rounded-xl p-3 shadow-sm">
-                    <div className="flex items-center space-x-2 mb-2">
-                      <FaBell className="text-yellow-600" />
-                      <span className="font-bold text-yellow-800 text-sm">Recent Notifications</span>
-                      <span className="bg-yellow-500 text-white text-xs rounded-full px-2 py-1 font-bold">
-                        {unreadCount}
-                      </span>
-                    </div>
-                    {notifications.slice(0, 2).map((notification) => (
-                      <div key={notification.id} className="text-sm text-yellow-700 mb-2 last:mb-0 flex items-center space-x-2">
-                        <div className="w-1 h-1 bg-yellow-500 rounded-full flex-shrink-0"></div>
-                        <span className="truncate">{notification.title}</span>
-                      </div>
-                    ))}
-                  </div>
-                </motion.div>
-              )}
-
-              {/* Mobile Auth Actions */}
-              <motion.div 
-                className="border-t border-gray-200 pt-4 mt-2"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ delay: 0.6 }}
-              >
-                {user ? (
-                  <button
-                    onClick={handleLogout}
-                    className="flex items-center space-x-3 w-full px-4 py-3 rounded-xl text-base font-semibold text-red-600 hover:bg-red-50 transition-all"
-                  >
-                    <FaSignOutAlt />
-                    <span>Logout</span>
-                  </button>
-                ) : (
-                  <Link
-                    to="/auth"
-                    className="flex items-center space-x-3 w-full px-4 py-3 rounded-xl text-base font-semibold text-blue-600 hover:bg-blue-50 transition-all"
-                    onClick={() => setMobileMenuOpen(false)}
-                  >
-                    <FaSignInAlt />
-                    <span>Sign In</span>
-                  </Link>
-                )}
-              </motion.div>
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-    </header>
+    </motion.header>
   );
 };
 

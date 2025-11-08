@@ -170,6 +170,65 @@ class ApiCache {
 
 const apiCache = new ApiCache();
 
+// ===== MISSING FUNCTION ADDED HERE =====
+const generateMockCommunityInsights = (period = 'month') => {
+  const baseData = {
+    period: period,
+    total_scans: 12547,
+    benign: {
+      percentage: 87.3,
+      count: 10958,
+      trend: 'up'
+    },
+    malignant: {
+      percentage: 12.7,
+      count: 1589,
+      trend: 'down'
+    },
+    health_tips: [
+      "85% of early-detected skin conditions have better outcomes",
+      "Regular self-exams can improve detection rates by 40%",
+      "Using sunscreen daily reduces skin cancer risk by 50%",
+      "Monthly skin checks help track changes over time"
+    ],
+    top_conditions: [
+      { name: "Benign Nevi", percentage: 42.3, trend: "stable" },
+      { name: "Actinic Keratosis", percentage: 18.7, trend: "up" },
+      { name: "Basal Cell Carcinoma", percentage: 12.1, trend: "stable" },
+      { name: "Melanoma", percentage: 6.3, trend: "down" }
+    ],
+    regional_data: {
+      most_active: "North America",
+      growth_rate: "15.2%",
+      average_accuracy: "94.7%"
+    }
+  };
+
+  // Adjust data based on period
+  const periodMultipliers = {
+    week: 0.1,
+    month: 1,
+    quarter: 3,
+    year: 12
+  };
+
+  const multiplier = periodMultipliers[period] || 1;
+  
+  return {
+    ...baseData,
+    total_scans: Math.round(baseData.total_scans * multiplier),
+    benign: {
+      ...baseData.benign,
+      count: Math.round(baseData.benign.count * multiplier)
+    },
+    malignant: {
+      ...baseData.malignant,
+      count: Math.round(baseData.malignant.count * multiplier)
+    }
+  };
+};
+// ===== END OF MISSING FUNCTION =====
+
 // ADD THE MISSING PREVENTIVE CARE FUNCTION
 export const getPreventiveCare = async (skinType = 'normal', concerns = []) => {
   const cacheKey = apiCache.generateKey('/api/preventive-care', { skinType, concerns });
@@ -659,6 +718,25 @@ export const apiService = {
         error: error.data?.error || error.message || 'Analysis failed',
         details: error.data?.details || 'Please try again with a clearer image',
         status: error.status,
+        timestamp: new Date().toISOString()
+      };
+    }
+  },
+
+  // Community Insights
+  async getCommunityInsights(period = 'month') {
+    try {
+      const data = await getCommunityInsights(period);
+      return {
+        success: true,
+        data: data,
+        timestamp: new Date().toISOString()
+      };
+    } catch (error) {
+      return {
+        success: false,
+        error: 'Failed to get community insights',
+        details: error.message,
         timestamp: new Date().toISOString()
       };
     }

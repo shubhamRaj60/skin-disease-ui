@@ -5,81 +5,240 @@
 
 /*
   ---------------------------------------------------
-  1. BASE STYLES
-  - Defining a professional font family and background.
+  1. BASE STYLES & TYPOGRAPHY
+  - Enhanced font stack and improved base styling
   ---------------------------------------------------
 */
 @layer base {
-  body {
-    @apply bg-gray-50 text-gray-800 font-sans;
+  html {
     scroll-behavior: smooth;
+    font-feature-settings: 'kern' 1, 'calt' 1, 'liga' 1;
+  }
+  
+  body {
+    @apply bg-gradient-to-br from-gray-50 to-blue-50/30 text-gray-900 font-sans antialiased;
+  }
+
+  /* Improved heading hierarchy */
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-semibold tracking-tight;
+  }
+
+  h1 {
+    @apply text-4xl md:text-5xl lg:text-6xl;
+  }
+
+  h2 {
+    @apply text-3xl md:text-4xl;
+  }
+
+  h3 {
+    @apply text-2xl md:text-3xl;
   }
 }
 
 /*
   ---------------------------------------------------
   2. CUSTOM COMPONENTS
-  - Creating reusable, semantic components using @apply.
-  - This ensures a consistent, professional look.
+  - Enhanced components with better visual hierarchy
+  - Added micro-interactions and accessibility
   ---------------------------------------------------
 */
 @layer components {
-  /* Main card style for sections and content blocks */
+  /* Enhanced card system */
   .app-card {
-    @apply bg-white rounded-3xl shadow-xl transition-all duration-300;
+    @apply bg-white/80 backdrop-blur-sm rounded-3xl shadow-lg 
+           border border-white/60 transition-all duration-300 
+           hover:shadow-xl hover:bg-white/90;
   }
   
-  /* A slightly more elevated, interactive card style */
   .app-card-interactive {
-    @apply app-card transform hover:translate-y-[-5px] hover:shadow-2xl;
+    @apply app-card transform hover:translate-y-[-8px] hover:shadow-2xl 
+           cursor-pointer active:scale-[0.98] active:translate-y-[-2px];
   }
 
-  /* Interactive button styles for primary actions */
+  .app-card-elevated {
+    @apply app-card shadow-2xl border-0 bg-gradient-to-br from-white to-blue-50/50;
+  }
+
+  /* Enhanced button system */
   .btn-primary {
-    @apply bg-blue-600 text-white font-semibold py-3 px-8 rounded-full shadow-md transition-all duration-300 transform hover:scale-105 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50;
+    @apply bg-gradient-to-r from-blue-600 to-blue-700 text-white 
+           font-semibold py-3.5 px-8 rounded-2xl shadow-lg 
+           transition-all duration-300 transform hover:scale-105 
+           hover:shadow-xl hover:from-blue-700 hover:to-blue-800 
+           active:scale-95 focus:outline-none focus:ring-4 
+           focus:ring-blue-500/30 focus:ring-offset-2 
+           disabled:opacity-50 disabled:cursor-not-allowed 
+           disabled:transform-none;
   }
   
-  /* Interactive button styles for secondary actions */
   .btn-secondary {
-    @apply bg-transparent border-2 border-blue-600 text-blue-600 font-semibold py-3 px-8 rounded-full shadow-sm transition-all duration-300 transform hover:scale-105 hover:bg-blue-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50;
+    @apply bg-white/80 backdrop-blur-sm border-2 border-blue-600/20 
+           text-blue-700 font-semibold py-3.5 px-8 rounded-2xl 
+           shadow-sm transition-all duration-300 transform 
+           hover:scale-105 hover:shadow-md hover:bg-blue-50/80 
+           hover:border-blue-600/30 active:scale-95 
+           focus:outline-none focus:ring-4 focus:ring-blue-500/20 
+           focus:ring-offset-1;
   }
 
-  /* The core style for the upload dropzone */
+  .btn-ghost {
+    @apply bg-transparent text-blue-600 font-medium py-3 px-6 
+           rounded-2xl transition-all duration-200 
+           hover:bg-blue-50/80 hover:shadow-sm 
+           active:bg-blue-100 focus:outline-none 
+           focus:ring-2 focus:ring-blue-500/30;
+  }
+
+  /* Enhanced upload zone */
   .upload-dropzone {
-    @apply relative p-8 md:p-12 text-center border-4 border-dashed rounded-3xl cursor-pointer transition-all duration-300;
+    @apply relative p-8 md:p-12 text-center border-3 border-dashed 
+           border-blue-200/60 rounded-3xl cursor-pointer 
+           transition-all duration-500 bg-gradient-to-br 
+           from-blue-50/30 to-transparent 
+           hover:border-blue-400 hover:bg-blue-50/50 
+           hover:shadow-inner active:bg-blue-100/30 
+           focus:outline-none focus:ring-4 focus:ring-blue-500/20;
   }
 
-  /* The hover state for the upload dropzone */
-  .upload-dropzone-hover {
-    @apply border-blue-400 bg-blue-50;
+  .upload-dropzone-dragging {
+    @apply border-blue-500 bg-blue-100/50 scale-[1.02] 
+           shadow-inner ring-4 ring-blue-500/20;
   }
 
-  /* An elegant style for medical icons or status circles */
+  /* Enhanced status system */
   .status-icon {
-    @apply w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-6 shadow-md;
-  }
-  
-  /* Style for headings to establish a clear visual hierarchy */
-  .heading-primary {
-    @apply text-3xl md:text-4xl font-bold text-blue-900 mb-4;
-  }
-  
-  /* Active link style for navigation */
-  .nav-link-active {
-    @apply text-blue-700 font-semibold border-b-2 border-blue-700;
+    @apply w-16 h-16 rounded-2xl flex items-center justify-center 
+           mx-auto mb-6 shadow-lg backdrop-blur-sm 
+           transition-all duration-300 hover:scale-110;
   }
 
-  /* Custom scrollbar for better visual integration */
+  .status-success {
+    @apply bg-gradient-to-br from-green-500 to-green-600 text-white;
+  }
+
+  .status-warning {
+    @apply bg-gradient-to-br from-amber-500 to-amber-600 text-white;
+  }
+
+  .status-error {
+    @apply bg-gradient-to-br from-red-500 to-red-600 text-white;
+  }
+
+  .status-info {
+    @apply bg-gradient-to-br from-blue-500 to-blue-600 text-white;
+  }
+
+  /* Enhanced typography */
+  .heading-primary {
+    @apply text-4xl md:text-5xl font-bold bg-gradient-to-r 
+           from-blue-900 to-blue-700 bg-clip-text text-transparent 
+           mb-6 leading-tight;
+  }
+
+  .heading-secondary {
+    @apply text-2xl md:text-3xl font-semibold text-blue-800 
+           mb-4 leading-snug;
+  }
+
+  .text-gradient {
+    @apply bg-gradient-to-r from-blue-700 to-blue-600 
+           bg-clip-text text-transparent font-semibold;
+  }
+
+  /* Enhanced navigation */
+  .nav-link {
+    @apply text-gray-600 font-medium px-4 py-2 rounded-2xl 
+           transition-all duration-200 hover:text-blue-700 
+           hover:bg-blue-50/80 active:bg-blue-100;
+  }
+
+  .nav-link-active {
+    @apply text-blue-700 font-semibold bg-gradient-to-r 
+           from-blue-50 to-blue-100/50 border border-blue-200/50 
+           shadow-sm;
+  }
+
+  /* Loading states */
+  .loading-spinner {
+    @apply inline-block w-5 h-5 border-2 border-white/30 
+           border-t-white rounded-full animate-spin;
+  }
+
+  /* Enhanced scrollbar */
+  .custom-scrollbar {
+    scrollbar-width: thin;
+    scrollbar-color: theme('colors.blue.400') theme('colors.blue.50');
+  }
+
   .custom-scrollbar::-webkit-scrollbar {
-    width: 8px;
+    width: 6px;
+    height: 6px;
   }
+
   .custom-scrollbar::-webkit-scrollbar-track {
-    background: #f1f5f9; /* bg-gray-100 */
-    border-radius: 10px;
+    @apply bg-blue-50/50 rounded-full;
   }
+
   .custom-scrollbar::-webkit-scrollbar-thumb {
-    background-color: #94a3b8; /* gray-400 */
-    border-radius: 10px;
-    border: 2px solid #f1f5f9;
+    @apply bg-gradient-to-b from-blue-400 to-blue-500 
+           rounded-full hover:from-blue-500 hover:to-blue-600 
+           transition-colors duration-200;
+  }
+
+  /* Glass morphism effect */
+  .glass {
+    @apply bg-white/20 backdrop-blur-lg border border-white/30 
+           shadow-2xl;
+  }
+
+  /* Focus states for accessibility */
+  .focus-ring {
+    @apply focus:outline-none focus:ring-4 focus:ring-blue-500/30 
+           focus:ring-offset-2 transition-all duration-200;
+  }
+}
+
+/*
+  ---------------------------------------------------
+  3. UTILITIES & ANIMATIONS
+  - Custom utilities and micro-animations
+  ---------------------------------------------------
+*/
+@layer utilities {
+  .animate-float {
+    animation: float 6s ease-in-out infinite;
+  }
+
+  .animate-glow {
+    animation: glow 2s ease-in-out infinite alternate;
+  }
+
+  .text-balance {
+    text-wrap: balance;
+  }
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-12px); }
+}
+
+@keyframes glow {
+  from { box-shadow: 0 0 20px -10px theme('colors.blue.500'); }
+  to { box-shadow: 0 0 25px -5px theme('colors.blue.500'); }
+}
+
+/* Reduced motion for accessibility */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+  
+  html {
+    scroll-behavior: auto;
   }
 }

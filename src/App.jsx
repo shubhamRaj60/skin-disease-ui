@@ -13,8 +13,8 @@ import UserProfile from './components/UserProfile';
 import Disclaimer from './components/Disclaimer';
 import XAIExplanation from './components/XAIExplanation';
 import CommunityInsights from './components/CommunityInsights';
-import PreventiveCare from './components/PreventiveCare';
 import './App.css';
+import './index.css';
 
 import { getRetrainingStatus, getModelPerformance, getCommunityInsights, getPreventiveCare } from './api';
 
@@ -215,10 +215,14 @@ class ErrorBoundary extends React.Component {
   componentDidCatch(error, errorInfo) {
     console.error('Error caught by boundary:', error, errorInfo);
     this.setState({ errorInfo });
+
+
+    if (import.meta.env.PROD) {
+  console.error('Production Error:', error, errorInfo);
+}
     
-    if (process.env.NODE_ENV === 'production') {
-      console.error('Production Error:', error, errorInfo);
-    }
+   
+    
   }
 
   render() {
@@ -253,7 +257,7 @@ class ErrorBoundary extends React.Component {
                 🏠 Go Home
               </a>
             </div>
-            {process.env.NODE_ENV === 'development' && this.state.error && (
+            {import.meta.env.DEV=== 'development' && this.state.error && (
               <details className="mt-6 text-left text-sm text-gray-500 border-t pt-4">
                 <summary className="cursor-pointer font-medium">Error Details (Development)</summary>
                 <pre className="mt-3 whitespace-pre-wrap text-xs bg-gray-100 p-3 rounded-lg overflow-auto max-h-60">
@@ -876,16 +880,6 @@ function App() {
                       insights={communityInsights}
                       onRefresh={loadCommunityInsights}
                       loading={loading}
-                    />
-                  </PageTransition>
-                } />
-
-                <Route path="/prevention" element={
-                  <PageTransition>
-                    <PreventiveCare 
-                      preventionData={preventionData}
-                      onLoadPreventionData={loadPreventionData}
-                      user={user}
                     />
                   </PageTransition>
                 } />

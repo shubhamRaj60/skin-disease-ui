@@ -165,7 +165,7 @@ const LeafletMap = ({ dermatologists, selectedDoc, userCoords, onDoctorSelect })
   };
 
   return (
-    <div className="w-full h-full rounded-xl overflow-hidden shadow-lg border-2 border-blue-200">
+    <div className="w-full h-full rounded-xl overflow-hidden shadow-lg border-2 border-blue-500/30">
       <MapContainer
         center={center}
         zoom={12}
@@ -366,47 +366,60 @@ const DermatologistFinder = () => {
   };
 
   return (
-    <section className="py-16 bg-gradient-to-br from-blue-50 to-cyan-50 min-h-screen text-gray-800 relative font-sans">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="bg-white rounded-3xl shadow-2xl p-8 md:p-12 transition-all duration-300 border border-blue-100">
+    <section className="py-16 bg-gradient-to-br from-gray-900 via-blue-900 to-slate-900 min-h-screen text-white relative font-sans">
+      {/* Background Elements */}
+      <div className="absolute inset-0 overflow-hidden">
+        <div className="absolute -top-40 -right-40 w-80 h-80 bg-cyan-900/20 rounded-full opacity-30 blur-3xl"></div>
+        <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-blue-900/20 rounded-full opacity-30 blur-3xl"></div>
+        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-purple-900/10 rounded-full opacity-20 blur-3xl"></div>
+      </div>
+
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+        <div className="bg-gray-800/50 backdrop-blur-lg rounded-3xl shadow-2xl p-8 md:p-12 transition-all duration-300 border border-gray-700/50">
           
           {/* Header */}
-          <div className="text-center mb-10">
-            <h3 className="text-3xl md:text-4xl font-extrabold text-blue-900 mb-4 tracking-tight">
-              🩺 Find Dermatologists in Kolkata
+          <div className="text-center mb-12">
+            <div className="inline-flex items-center px-4 py-2 rounded-full bg-blue-800/50 text-cyan-300 font-medium mb-6 border border-cyan-500/30 backdrop-blur-sm">
+              <FaUserMd className="mr-2" />
+              Find Dermatologists
+            </div>
+            <h3 className="text-4xl md:text-5xl font-bold text-white mb-6 tracking-tight">
+              Find Dermatologists in Kolkata
             </h3>
-            <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-              Connect with the best skin specialists in Newtown, Kolkata and nearby areas.
+            <p className="text-xl text-gray-300 max-w-2xl mx-auto leading-relaxed">
+              Connect with the best skin specialists in Newtown, Kolkata and nearby areas
             </p>
           </div>
 
           {/* Quick Location Buttons */}
-          <div className="mb-8">
-            <h4 className="text-sm font-semibold text-gray-600 mb-4 text-center">POPULAR AREAS IN KOLKATA</h4>
-            <div className="flex flex-wrap justify-center gap-3 mb-6">
+          <div className="mb-10">
+            <h4 className="text-sm font-semibold text-gray-400 mb-6 text-center tracking-wide">POPULAR AREAS IN KOLKATA</h4>
+            <div className="flex flex-wrap justify-center gap-4 mb-8">
               {KOLKATA_DERMATOLOGY_DATABASE.locations.slice(0, 6).map(city => (
-                <button
+                <motion.button
                   key={city.id}
                   onClick={() => handleQuickLocation(city.name)}
-                  className="bg-blue-100 hover:bg-blue-200 text-blue-700 px-5 py-3 rounded-full text-sm font-medium transition-all duration-200 hover:scale-105 shadow-md hover:shadow-lg border border-blue-200"
+                  className="bg-blue-800/50 hover:bg-blue-700/50 text-cyan-300 px-6 py-4 rounded-2xl font-medium transition-all duration-200 hover:scale-105 shadow-lg hover:shadow-xl border border-cyan-500/30 backdrop-blur-sm"
+                  whileHover={{ y: -2 }}
+                  whileTap={{ scale: 0.95 }}
                 >
-                  <FaMapMarkerAlt className="inline mr-2" />
+                  <FaMapMarkerAlt className="inline mr-3 text-cyan-400" />
                   {city.name}
-                </button>
+                </motion.button>
               ))}
             </div>
           </div>
 
           {/* Search Form */}
-          <form onSubmit={handleSearch} className="flex flex-col md:flex-row items-center mb-8 gap-4">
+          <form onSubmit={handleSearch} className="flex flex-col md:flex-row items-center mb-10 gap-6">
             <div className="relative flex-1 w-full">
-              <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                <FaMapMarkerAlt className="text-gray-400 text-lg" />
+              <div className="absolute inset-y-0 left-0 pl-5 flex items-center pointer-events-none">
+                <FaMapMarkerAlt className="text-cyan-400 text-xl" />
               </div>
               <input
                 type="text"
                 placeholder="Enter your area in Kolkata (e.g., Newtown, Salt Lake, Park Street...)"
-                className="pl-12 w-full bg-gray-50 border-2 border-gray-200 rounded-full p-4 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-lg shadow-inner transition-all"
+                className="pl-14 w-full bg-gray-700/50 border-2 border-gray-600/50 rounded-2xl p-5 focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 text-lg text-white placeholder-gray-400 shadow-inner transition-all backdrop-blur-sm"
                 value={location}
                 onChange={(e) => setLocation(e.target.value)}
                 list="kolkata-locations"
@@ -418,81 +431,95 @@ const DermatologistFinder = () => {
               </datalist>
             </div>
             
-            <div className="flex items-center gap-3 w-full md:w-auto">
-              <button
+            <div className="flex items-center gap-4 w-full md:w-auto">
+              <motion.button
                 type="button"
                 onClick={handleGetCurrentLocation}
-                className="bg-blue-100 hover:bg-blue-200 text-blue-600 p-4 rounded-full transition-all duration-200 disabled:opacity-50 shadow-md hover:shadow-lg border border-blue-200"
+                className="bg-blue-800/50 hover:bg-blue-700/50 text-cyan-300 p-5 rounded-2xl transition-all duration-200 disabled:opacity-50 shadow-lg hover:shadow-xl border border-cyan-500/30 backdrop-blur-sm"
                 title="Use my current location"
                 disabled={isLoadingLocation}
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
               >
                 {isLoadingLocation ? (
-                  <div className="w-5 h-5 border-2 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
+                  <div className="w-6 h-6 border-2 border-cyan-400 border-t-transparent rounded-full animate-spin"></div>
                 ) : (
-                  <FaCrosshairs className="text-lg" />
+                  <FaCrosshairs className="text-xl" />
                 )}
-              </button>
-              <button
+              </motion.button>
+              <motion.button
                 type="submit"
-                className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-4 rounded-full font-semibold flex items-center shadow-lg transition-all duration-200 hover:scale-[1.02] flex-1 md:flex-none justify-center transform hover:shadow-xl"
+                className="bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700 text-white px-10 py-5 rounded-2xl font-semibold flex items-center shadow-xl transition-all duration-200 hover:scale-[1.02] flex-1 md:flex-none justify-center transform hover:shadow-2xl text-lg border border-cyan-500/30"
+                whileHover={{ y: -2 }}
+                whileTap={{ scale: 0.98 }}
               >
-                <FaSearch className="mr-3" /> Search Dermatologists
-              </button>
+                <FaSearch className="mr-4 text-lg" /> Search Dermatologists
+              </motion.button>
             </div>
           </form>
 
           {/* Specialty Filter */}
-          <div className="mb-8">
-            <h4 className="text-sm font-semibold text-gray-600 mb-4 text-center">FILTER BY SPECIALIZATION</h4>
-            <div className="flex flex-wrap justify-center gap-3">
-              <button
+          <div className="mb-10">
+            <h4 className="text-sm font-semibold text-gray-400 mb-6 text-center tracking-wide">FILTER BY SPECIALIZATION</h4>
+            <div className="flex flex-wrap justify-center gap-4">
+              <motion.button
                 onClick={() => setSelectedSpecialty('')}
-                className={`px-5 py-3 rounded-full text-sm font-medium transition-all duration-200 ${
+                className={`px-6 py-4 rounded-2xl font-medium transition-all duration-200 ${
                   selectedSpecialty === '' 
-                    ? 'bg-blue-600 text-white shadow-lg' 
-                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200 shadow-md'
+                    ? 'bg-gradient-to-r from-cyan-500 to-blue-600 text-white shadow-xl' 
+                    : 'bg-gray-700/50 text-gray-300 hover:bg-gray-600/50 shadow-lg border border-gray-600/50'
                 }`}
+                whileHover={{ y: -2 }}
+                whileTap={{ scale: 0.95 }}
               >
                 All Specialties
-              </button>
+              </motion.button>
               {KOLKATA_DERMATOLOGY_DATABASE.specialties.map((specialty, index) => (
-                <button
+                <motion.button
                   key={index}
                   onClick={() => setSelectedSpecialty(specialty)}
-                  className={`px-5 py-3 rounded-full text-sm font-medium transition-all duration-200 ${
+                  className={`px-6 py-4 rounded-2xl font-medium transition-all duration-200 ${
                     selectedSpecialty === specialty 
-                      ? 'bg-blue-600 text-white shadow-lg' 
-                      : 'bg-gray-100 text-gray-700 hover:bg-gray-200 shadow-md'
+                      ? 'bg-gradient-to-r from-cyan-500 to-blue-600 text-white shadow-xl' 
+                      : 'bg-gray-700/50 text-gray-300 hover:bg-gray-600/50 shadow-lg border border-gray-600/50'
                   }`}
+                  whileHover={{ y: -2 }}
+                  whileTap={{ scale: 0.95 }}
                 >
                   {specialty}
-                </button>
+                </motion.button>
               ))}
             </div>
           </div>
 
           {/* Results Summary */}
           {(location || selectedSpecialty) && (
-            <div className="flex flex-col sm:flex-row justify-between items-center mb-8 p-4 bg-blue-50 rounded-2xl border border-blue-200">
-              <p className="text-gray-700 text-center sm:text-left mb-2 sm:mb-0">
-                🎯 Found <span className="font-bold text-blue-600 text-lg">{filteredDermatologists.length}</span> dermatologists
+            <motion.div 
+              className="flex flex-col sm:flex-row justify-between items-center mb-10 p-6 bg-blue-900/30 rounded-2xl border border-cyan-500/30 backdrop-blur-sm"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+            >
+              <p className="text-gray-300 text-center sm:text-left mb-3 sm:mb-0 text-lg">
+                🎯 Found <span className="font-bold text-cyan-400 text-xl">{filteredDermatologists.length}</span> dermatologists
                 {location && ` near ${location}`}
                 {selectedSpecialty && ` specializing in ${selectedSpecialty}`}
                 {userCoords && ` • Sorted by distance`}
               </p>
-              <button
+              <motion.button
                 onClick={clearFilters}
-                className="text-red-500 hover:text-red-700 text-sm font-medium bg-white px-4 py-2 rounded-full border border-red-200 hover:bg-red-50 transition-colors"
+                className="text-red-400 hover:text-red-300 font-medium bg-gray-700/50 px-5 py-3 rounded-xl border border-red-500/30 hover:bg-red-900/20 transition-all duration-200"
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
               >
                 Clear All Filters
-              </button>
-            </div>
+              </motion.button>
+            </motion.div>
           )}
 
-          <div className="grid lg:grid-cols-2 gap-8">
+          <div className="grid lg:grid-cols-2 gap-10">
             {/* Dermatologists List */}
-            <div className="space-y-6 max-h-[700px] overflow-y-auto pr-4 custom-scrollbar">
-              <h4 className="font-bold text-blue-900 mb-6 text-2xl sticky top-0 bg-white z-10 py-4 border-b border-gray-200">
+            <div className="space-y-8 max-h-[700px] overflow-y-auto pr-4 custom-scrollbar">
+              <h4 className="font-bold text-white mb-8 text-2xl sticky top-0 bg-gray-800/80 backdrop-blur-sm z-10 py-6 border-b border-gray-700/50 rounded-2xl px-4">
                 {results.length > 0 ? "👨‍⚕️ Available Dermatologists" : "🔍 Search for Dermatologists"}
               </h4>
               
@@ -500,8 +527,8 @@ const DermatologistFinder = () => {
                 results.map(doc => (
                   <motion.div
                     key={doc.id}
-                    className={`flex items-start p-6 bg-white rounded-2xl hover:bg-blue-50 cursor-pointer transition-all duration-300 shadow-lg hover:shadow-xl border-2 ${
-                      selectedDoc?.id === doc.id ? 'border-blue-500 bg-blue-50' : 'border-white'
+                    className={`flex items-start p-8 bg-gray-700/30 backdrop-blur-sm rounded-2xl hover:bg-blue-900/30 cursor-pointer transition-all duration-300 shadow-xl hover:shadow-2xl border-2 ${
+                      selectedDoc?.id === doc.id ? 'border-cyan-500 bg-blue-900/30' : 'border-gray-600/30'
                     }`}
                     onClick={() => setSelectedDoc(doc)}
                     initial={{ opacity: 0, y: 20 }}
@@ -512,41 +539,41 @@ const DermatologistFinder = () => {
                     <img 
                       src={doc.image} 
                       alt={doc.name} 
-                      className="w-20 h-20 rounded-2xl object-cover mr-5 border-4 border-blue-200 shadow-md" 
+                      className="w-24 h-24 rounded-2xl object-cover mr-6 border-4 border-cyan-500/50 shadow-lg" 
                     />
                     <div className="flex-1">
-                      <div className="flex justify-between items-start mb-2">
-                        <h4 className="font-bold text-blue-800 text-xl">{doc.name}</h4>
-                        <span className="bg-green-100 text-green-800 text-xs font-semibold px-3 py-1 rounded-full">
+                      <div className="flex justify-between items-start mb-4">
+                        <h4 className="font-bold text-white text-2xl">{doc.name}</h4>
+                        <span className="bg-green-900/50 text-green-300 font-semibold px-4 py-2 rounded-xl border border-green-500/30">
                           {doc.distance}
                         </span>
                       </div>
-                      <p className="text-gray-700 font-medium mb-2">{doc.specialty}</p>
-                      <p className="text-gray-600 text-sm mb-3">{doc.clinic} • {doc.experience}</p>
+                      <p className="text-cyan-300 font-semibold text-lg mb-3">{doc.specialty}</p>
+                      <p className="text-gray-300 text-base mb-4 leading-relaxed">{doc.clinic} • {doc.experience}</p>
                       
                       <div className="flex items-center justify-between">
                         <div className="flex items-center">
-                          <div className="flex text-yellow-500 mr-2">
+                          <div className="flex text-yellow-400 mr-3">
                             {[...Array(5)].map((_, i) => (
                               <FaStar
                                 key={i}
-                                className={i < Math.floor(doc.rating) ? "text-yellow-500" : "text-gray-300"}
-                                size={14}
+                                className={i < Math.floor(doc.rating) ? "text-yellow-400" : "text-gray-600"}
+                                size={16}
                               />
                             ))}
                           </div>
-                          <span className="text-gray-600 text-sm font-medium">
+                          <span className="text-gray-300 text-base font-medium">
                             {doc.rating} ({doc.reviews} reviews)
                           </span>
                         </div>
                         
-                        <div className="flex items-center gap-4 text-sm text-gray-600">
-                          <span className="flex items-center">
-                            <FaMapMarkerAlt className="inline text-blue-500 mr-1" />
+                        <div className="flex items-center gap-6 text-base text-gray-300">
+                          <span className="flex items-center bg-blue-900/30 px-4 py-2 rounded-xl border border-blue-500/30">
+                            <FaMapMarkerAlt className="inline text-cyan-400 mr-2" />
                             {doc.location}
                           </span>
-                          <span className="flex items-center">
-                            <FaRegCalendarCheck className="inline text-green-500 mr-1" />
+                          <span className="flex items-center bg-green-900/30 px-4 py-2 rounded-xl border border-green-500/30">
+                            <FaRegCalendarCheck className="inline text-green-400 mr-2" />
                             {doc.availability}
                           </span>
                         </div>
@@ -555,27 +582,27 @@ const DermatologistFinder = () => {
                   </motion.div>
                 ))
               ) : (
-                <div className="text-center py-16 bg-gradient-to-br from-blue-50 to-cyan-50 rounded-3xl shadow-inner border-2 border-dashed border-blue-200">
-                  <div className="w-24 h-24 mx-auto mb-6 bg-white rounded-full flex items-center justify-center animate-bounce-slow shadow-lg border border-blue-200">
-                    <FaUserMd className="text-blue-500 text-4xl" />
+                <div className="text-center py-20 bg-gradient-to-br from-gray-800/30 to-blue-900/20 rounded-3xl shadow-inner border-2 border-dashed border-cyan-500/30 backdrop-blur-sm">
+                  <div className="w-28 h-28 mx-auto mb-8 bg-gray-700/50 rounded-full flex items-center justify-center animate-bounce-slow shadow-xl border border-cyan-500/30">
+                    <FaUserMd className="text-cyan-400 text-5xl" />
                   </div>
-                  <h4 className="font-bold text-blue-800 text-xl mb-3">Find Kolkata's Best Dermatologists</h4>
-                  <p className="text-gray-600 font-medium mb-2">Enter your location to discover certified skin specialists near you</p>
-                  <p className="text-gray-500 text-sm">
-                    Try searching for: <span className="text-blue-600 font-medium">"Newtown"</span>, 
-                    <span className="text-blue-600 font-medium"> "Salt Lake"</span>, or 
-                    <span className="text-blue-600 font-medium"> "Park Street"</span>
+                  <h4 className="font-bold text-white text-2xl mb-4">Find Kolkata's Best Dermatologists</h4>
+                  <p className="text-gray-300 font-medium text-lg mb-4 leading-relaxed">Enter your location to discover certified skin specialists near you</p>
+                  <p className="text-gray-400 text-base">
+                    Try searching for: <span className="text-cyan-400 font-medium">"Newtown"</span>, 
+                    <span className="text-cyan-400 font-medium"> "Salt Lake"</span>, or 
+                    <span className="text-cyan-400 font-medium"> "Park Street"</span>
                   </p>
                 </div>
               )}
             </div>
 
             {/* Map and Doctor Details Section */}
-            <div className="space-y-6">
+            <div className="space-y-8">
               {/* Leaflet Map */}
-              <div className="bg-white rounded-2xl p-6 shadow-lg border border-blue-100">
-                <h4 className="font-bold text-blue-900 mb-4 text-xl flex items-center gap-3">
-                  <FaMapMarkerAlt className="text-blue-500" />
+              <div className="bg-gray-800/50 backdrop-blur-sm rounded-2xl p-8 shadow-xl border border-gray-700/50">
+                <h4 className="font-bold text-white mb-6 text-2xl flex items-center gap-4">
+                  <FaMapMarkerAlt className="text-cyan-400 text-2xl" />
                   Dermatologists Map - Kolkata
                 </h4>
                 <LeafletMap 
@@ -584,7 +611,7 @@ const DermatologistFinder = () => {
                   userCoords={userCoords}
                   onDoctorSelect={handleDoctorSelectFromMap}
                 />
-                <p className="text-gray-600 text-sm mt-3 text-center">
+                <p className="text-gray-400 text-base mt-4 text-center leading-relaxed">
                   💡 Click on red markers to see doctor details and get directions
                 </p>
               </div>
@@ -592,41 +619,41 @@ const DermatologistFinder = () => {
               {/* Selected Dermatologist Profile */}
               {selectedDoc && (
                 <motion.div 
-                  className="bg-gradient-to-br from-gray-50 to-blue-50 rounded-2xl p-6 shadow-lg border border-gray-200"
+                  className="bg-gradient-to-br from-gray-800/50 to-blue-900/30 backdrop-blur-sm rounded-2xl p-8 shadow-xl border border-cyan-500/30"
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.3 }}
                 >
-                  <div className="flex items-start gap-4 mb-6 pb-6 border-b border-gray-200">
+                  <div className="flex items-start gap-6 mb-8 pb-8 border-b border-gray-700/50">
                     <img 
                       src={selectedDoc.image} 
                       alt={selectedDoc.name} 
-                      className="w-20 h-20 rounded-2xl border-4 border-blue-400 shadow-lg object-cover" 
+                      className="w-24 h-24 rounded-2xl border-4 border-cyan-400 shadow-xl object-cover" 
                     />
                     <div className="flex-1">
-                      <h4 className="font-bold text-blue-900 text-xl mb-2">{selectedDoc.name}</h4>
-                      <p className="text-gray-700 font-semibold mb-2">{selectedDoc.specialty}</p>
-                      <div className="flex items-center mb-2">
-                        <div className="flex text-yellow-500 mr-3">
+                      <h4 className="font-bold text-white text-2xl mb-3">{selectedDoc.name}</h4>
+                      <p className="text-cyan-300 font-semibold text-lg mb-3">{selectedDoc.specialty}</p>
+                      <div className="flex items-center mb-3">
+                        <div className="flex text-yellow-400 mr-4">
                           {[...Array(5)].map((_, i) => (
                             <FaStar
                               key={i}
-                              className={i < Math.floor(selectedDoc.rating) ? "text-yellow-500" : "text-gray-300"}
-                              size={14}
+                              className={i < Math.floor(selectedDoc.rating) ? "text-yellow-400" : "text-gray-600"}
+                              size={16}
                             />
                           ))}
                         </div>
-                        <span className="text-gray-600 font-medium">
+                        <span className="text-gray-300 font-medium text-base">
                           {selectedDoc.rating} ({selectedDoc.reviews} reviews)
                         </span>
                       </div>
-                      <div className="flex items-center gap-4 text-sm text-gray-600">
-                        <span className="flex items-center bg-blue-100 px-3 py-1 rounded-full">
-                          <FaMapMarkerAlt className="inline text-blue-500 mr-1" />
+                      <div className="flex items-center gap-4 text-base text-gray-300">
+                        <span className="flex items-center bg-blue-900/50 px-4 py-2 rounded-xl border border-blue-500/30">
+                          <FaMapMarkerAlt className="inline text-cyan-400 mr-2" />
                           {selectedDoc.distance} away
                         </span>
-                        <span className="flex items-center bg-green-100 px-3 py-1 rounded-full">
-                          <FaRegCalendarCheck className="inline text-green-500 mr-1" />
+                        <span className="flex items-center bg-green-900/50 px-4 py-2 rounded-xl border border-green-500/30">
+                          <FaRegCalendarCheck className="inline text-green-400 mr-2" />
                           {selectedDoc.availability}
                         </span>
                       </div>
@@ -634,40 +661,40 @@ const DermatologistFinder = () => {
                   </div>
 
                   {/* Quick Info */}
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-                    <div className="space-y-3">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+                    <div className="space-y-4">
                       <div>
-                        <strong className="text-gray-700">Clinic:</strong>
-                        <p className="text-gray-600 text-sm">{selectedDoc.clinic}</p>
+                        <strong className="text-cyan-300 text-lg">Clinic:</strong>
+                        <p className="text-gray-300 text-base mt-1">{selectedDoc.clinic}</p>
                       </div>
                       <div>
-                        <strong className="text-gray-700">Address:</strong>
-                        <p className="text-gray-600 text-sm">{selectedDoc.address}</p>
+                        <strong className="text-cyan-300 text-lg">Address:</strong>
+                        <p className="text-gray-300 text-base mt-1 leading-relaxed">{selectedDoc.address}</p>
                       </div>
                       <div>
-                        <strong className="text-gray-700">Timing:</strong>
-                        <p className="text-gray-600 text-sm">{selectedDoc.timing}</p>
+                        <strong className="text-cyan-300 text-lg">Timing:</strong>
+                        <p className="text-gray-300 text-base mt-1">{selectedDoc.timing}</p>
                       </div>
                     </div>
-                    <div className="space-y-3">
+                    <div className="space-y-4">
                       <div>
-                        <strong className="text-gray-700">Fees:</strong>
-                        <p className="text-gray-600 text-sm">{selectedDoc.fees}</p>
+                        <strong className="text-cyan-300 text-lg">Fees:</strong>
+                        <p className="text-gray-300 text-base mt-1">{selectedDoc.fees}</p>
                       </div>
                       <div>
-                        <strong className="text-gray-700">Languages:</strong>
-                        <p className="text-gray-600 text-sm">{selectedDoc.languages.join(', ')}</p>
+                        <strong className="text-cyan-300 text-lg">Languages:</strong>
+                        <p className="text-gray-300 text-base mt-1">{selectedDoc.languages.join(', ')}</p>
                       </div>
-                      <div className="flex gap-2">
+                      <div className="flex gap-3">
                         <a 
                           href={`tel:${selectedDoc.phone}`} 
-                          className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-blue-700 transition-all duration-200 shadow-md flex-1 justify-center"
+                          className="flex items-center gap-3 bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-xl font-medium transition-all duration-200 shadow-lg hover:shadow-xl flex-1 justify-center"
                         >
                           <FaPhoneAlt /> Call
                         </a>
                         <button
                           onClick={() => openDirections(selectedDoc)}
-                          className="flex items-center gap-2 bg-green-500 text-white px-4 py-2 rounded-lg text-sm hover:bg-green-600 transition-all duration-200 shadow-md flex-1 justify-center"
+                          className="flex items-center gap-3 bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-xl font-medium transition-all duration-200 shadow-lg hover:shadow-xl flex-1 justify-center"
                         >
                           <FaDirections /> Directions
                         </button>
@@ -675,12 +702,14 @@ const DermatologistFinder = () => {
                     </div>
                   </div>
 
-                  <button
+                  <motion.button
                     onClick={() => setShowBookingModal(true)}
-                    className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-xl transition-all duration-200 hover:scale-[1.02] shadow-lg"
+                    className="w-full bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700 text-white font-bold py-4 rounded-2xl transition-all duration-200 hover:scale-[1.02] shadow-xl text-lg border border-cyan-500/30"
+                    whileHover={{ y: -2 }}
+                    whileTap={{ scale: 0.98 }}
                   >
                     📅 Book Appointment
-                  </button>
+                  </motion.button>
                 </motion.div>
               )}
             </div>
@@ -692,86 +721,88 @@ const DermatologistFinder = () => {
       <AnimatePresence>
         {showBookingModal && selectedDoc && (
           <motion.div
-            className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center p-4 z-50 backdrop-blur-sm"
+            className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center p-4 z-50 backdrop-blur-sm"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={() => setShowBookingModal(false)}
           >
             <motion.div
-              className="bg-white p-8 rounded-3xl shadow-2xl max-w-md w-full relative border border-blue-100"
+              className="bg-gray-800 p-10 rounded-3xl shadow-2xl max-w-md w-full relative border border-cyan-500/30 backdrop-blur-lg"
               initial={{ opacity: 0, y: -50, scale: 0.9 }}
               animate={{ opacity: 1, y: 0, scale: 1 }}
               exit={{ opacity: 0, y: 50, scale: 0.9 }}
               onClick={(e) => e.stopPropagation()}
             >
               <button
-                className="absolute top-6 right-6 text-gray-400 hover:text-gray-600 transition text-xl"
+                className="absolute top-8 right-8 text-gray-400 hover:text-gray-200 transition text-2xl"
                 onClick={() => setShowBookingModal(false)}
               >
                 <FaTimes />
               </button>
               
-              <div className="text-center mb-2">
-                <h3 className="text-2xl font-bold text-blue-900 mb-2">
+              <div className="text-center mb-6">
+                <h3 className="text-3xl font-bold text-white mb-3">
                   Book with {selectedDoc.name}
                 </h3>
-                <p className="text-gray-600 mb-1">{selectedDoc.specialty}</p>
-                <p className="text-sm text-gray-500">{selectedDoc.clinic}</p>
+                <p className="text-cyan-300 text-lg mb-2">{selectedDoc.specialty}</p>
+                <p className="text-gray-400 text-base">{selectedDoc.clinic}</p>
               </div>
 
-              <form className="space-y-4">
+              <form className="space-y-6">
                 <div>
-                  <label className="block text-gray-700 font-medium mb-2">Your Full Name</label>
+                  <label className="block text-cyan-300 font-semibold mb-3 text-lg">Your Full Name</label>
                   <input 
                     type="text" 
-                    className="w-full p-4 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
+                    className="w-full p-4 bg-gray-700/50 border-2 border-gray-600/50 rounded-xl focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 transition-all text-white placeholder-gray-400"
                     placeholder="Enter your name"
                   />
                 </div>
                 
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-gray-700 font-medium mb-2">Phone Number</label>
+                    <label className="block text-cyan-300 font-semibold mb-3 text-lg">Phone Number</label>
                     <input 
                       type="tel" 
-                      className="w-full p-4 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
+                      className="w-full p-4 bg-gray-700/50 border-2 border-gray-600/50 rounded-xl focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 transition-all text-white placeholder-gray-400"
                       placeholder="+91"
                     />
                   </div>
                   <div>
-                    <label className="block text-gray-700 font-medium mb-2">Email</label>
+                    <label className="block text-cyan-300 font-semibold mb-3 text-lg">Email</label>
                     <input 
                       type="email" 
-                      className="w-full p-4 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
+                      className="w-full p-4 bg-gray-700/50 border-2 border-gray-600/50 rounded-xl focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 transition-all text-white placeholder-gray-400"
                       placeholder="your@email.com"
                     />
                   </div>
                 </div>
 
                 <div>
-                  <label className="block text-gray-700 font-medium mb-2">Preferred Date</label>
+                  <label className="block text-cyan-300 font-semibold mb-3 text-lg">Preferred Date</label>
                   <input 
                     type="date" 
-                    className="w-full p-4 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
+                    className="w-full p-4 bg-gray-700/50 border-2 border-gray-600/50 rounded-xl focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 transition-all text-white"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-gray-700 font-medium mb-2">Medical Concern</label>
+                  <label className="block text-cyan-300 font-semibold mb-3 text-lg">Medical Concern</label>
                   <textarea 
-                    className="w-full p-4 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all" 
-                    rows="3"
+                    className="w-full p-4 bg-gray-700/50 border-2 border-gray-600/50 rounded-xl focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 transition-all text-white placeholder-gray-400" 
+                    rows="4"
                     placeholder="Briefly describe your skin concern..."
                   ></textarea>
                 </div>
 
-                <button 
+                <motion.button 
                   type="submit" 
-                  className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 rounded-xl shadow-lg transition-all duration-200 hover:scale-[1.02] hover:shadow-xl text-lg"
+                  className="w-full bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700 text-white font-bold py-4 rounded-2xl shadow-xl transition-all duration-200 hover:scale-[1.02] hover:shadow-2xl text-lg border border-cyan-500/30"
+                  whileHover={{ y: -2 }}
+                  whileTap={{ scale: 0.98 }}
                 >
                   Confirm Appointment Request
-                </button>
+                </motion.button>
               </form>
             </motion.div>
           </motion.div>
@@ -784,13 +815,13 @@ const DermatologistFinder = () => {
             width: 8px;
         }
         .custom-scrollbar::-webkit-scrollbar-track {
-            background: #f1f5f9;
+            background: rgba(31, 41, 55, 0.5);
             border-radius: 10px;
         }
         .custom-scrollbar::-webkit-scrollbar-thumb {
-            background-color: #94a3b8;
+            background-color: rgba(6, 182, 212, 0.5);
             border-radius: 10px;
-            border: 2px solid #f1f5f9;
+            border: 2px solid rgba(31, 41, 55, 0.5);
         }
         @keyframes bounce-slow {
             0%, 100% { transform: translateY(0); }
