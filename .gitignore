@@ -13,6 +13,7 @@ dist/
 *.env.local
 .env.*
 !.env.example
+.env.production
 
 # Editor directories and files
 .vscode/*
