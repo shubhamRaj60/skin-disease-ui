@@ -29,21 +29,20 @@ jobs:
 
       - name: Install deps
         run: npm ci
-        working-directory: ./skin-disease-app/skin-disease-ui
+        working-directory: .
 
       - name: Build
         env:
           VITE_API_BASE_URL: ${{ secrets.VITE_API_BASE_URL }}
-          # Optional: set base path for project pages, e.g. /your-repo-name/
-          # VITE_BASE: ${{ vars.VITE_BASE }}
+          VITE_BASE: /skin-disease-ui/
         run: |
           npm run build
-        working-directory: ./skin-disease-app/skin-disease-ui
+        working-directory: .
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: ./skin-disease-app/skin-disease-ui/dist
+          path: ./dist
 
   deploy:
     needs: build
